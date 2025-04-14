@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { login as apiLogin, register as apiRegister, logout as apiLogout, getCurrentUser } from '../api/auth';
 
 const AuthContext = createContext(null);
 
@@ -20,9 +21,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      // TODO: Implement actual login logic with backend
-      // For now, simulate a successful login
-      const user = { email, name: email.split('@')[0] };
+      const { token } = await apiLogin(email, password);
+      const user = { email, token };
       setCurrentUser(user);
       return user;
     } catch (error) {
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setLoading(true);
     try {
-      // TODO: Implement actual logout logic with backend
+      await apiLogout();
       setCurrentUser(null);
     } finally {
       setLoading(false);
@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (email, password, name) => {
     setLoading(true);
     try {
-      // TODO: Implement actual registration logic with backend
-      const user = { email, name };
+      const { token } = await apiRegister(email, password, name);
+      const user = { email, name, token };
       setCurrentUser(user);
       return user;
     } catch (error) {
