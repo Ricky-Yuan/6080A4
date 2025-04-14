@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import Input from '../common/Input';
+import Button from '../common/Button';
 
 const RegisterForm = () => {
   const [name, setName] = useState('');
@@ -32,36 +34,32 @@ const RegisterForm = () => {
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 max-w-md mx-auto p-8 bg-white rounded-lg shadow-md"
     >
-      <input
+      <Input
         type="text"
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-      <input
+      <Input
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-      <input
+      <Input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-      <input
+      <Input
         type="password"
         placeholder="Confirm Password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
       {error && (
@@ -69,12 +67,9 @@ const RegisterForm = () => {
           {error}
         </div>
       )}
-      <button
-        type="submit"
-        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-      >
+      <Button type="submit" variant="success">
         Register
-      </button>
+      </Button>
     </form>
   );
 };
