@@ -21,12 +21,14 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const { token } = await apiLogin(email, password);
+      const response = await apiLogin(email, password);
+      const { token } = response;
       const user = { email, token };
       setCurrentUser(user);
       return user;
     } catch (error) {
-      throw new Error('Invalid email or password');
+      console.error('Login error:', error);
+      throw new Error(error.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -45,12 +47,14 @@ export const AuthProvider = ({ children }) => {
   const register = async (email, password, name) => {
     setLoading(true);
     try {
-      const { token } = await apiRegister(email, password, name);
+      const response = await apiRegister(email, password, name);
+      const { token } = response;
       const user = { email, name, token };
       setCurrentUser(user);
       return user;
     } catch (error) {
-      throw new Error('Registration failed');
+      console.error('Registration error:', error);
+      throw new Error(error.message || 'Registration failed');
     } finally {
       setLoading(false);
     }

@@ -21,7 +21,20 @@ const apiClient = {
     };
 
     const response = await fetch(`${BASE_URL}${endpoint}`, config);
-    const data = await response.json();
+    
+    // 对于204状态码（无内容）的响应，直接返回
+    if (response.status === 204) {
+      return {};
+    }
+
+    // 尝试解析JSON响应
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      // 如果响应不是JSON格式，返回空对象
+      data = {};
+    }
 
     if (!response.ok) {
       throw new Error(data.error || 'Request failed');

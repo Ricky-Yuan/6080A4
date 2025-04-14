@@ -15,10 +15,14 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
+      // 先清除本地存储中的用户信息
+      localStorage.removeItem('currentUser');
       await logout();
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
+      // 即使登出失败也要重定向到登录页
+      navigate('/login');
     }
   };
 
