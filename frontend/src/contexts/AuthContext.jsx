@@ -25,10 +25,41 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
+  const login = async (email, password) => {
+    const response = await loginApi(email, password);
+    localStorage.setItem('token', response.token);
+    setUser(response.user);
+    return response;
+  };
+
+  const register = async (email, password, name) => {
+    const response = await registerApi(email, password, name);
+    localStorage.setItem('token', response.token);
+    setUser(response.user);
+    return response;
+  };
+
+  const logout = async () => {
+    await logoutApi();
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+
   const value = {
     user,
     loading,
+    login,
+    register,
+    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }; 
