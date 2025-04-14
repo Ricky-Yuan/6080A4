@@ -34,12 +34,12 @@ const PublicRoute = ({ children }) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<PublicRoute><LoginForm /></PublicRoute>} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<PublicRoute><LoginForm /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><RegisterForm /></PublicRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><div>Profile (to be implemented)</div></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };
