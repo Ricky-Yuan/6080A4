@@ -5,9 +5,10 @@ const Button = ({
   type = 'button', 
   onClick, 
   variant = 'primary',
-  className = ''
+  className = '',
+  disabled = false
 }) => {
-  const baseStyles = 'px-4 py-2 rounded-md focus:outline-none focus:ring-2 transition-colors duration-200';
+  const baseStyles = 'px-4 py-2 rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 disabled:opacity-50';
   
   const variants = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
@@ -20,6 +21,7 @@ const Button = ({
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={`${baseStyles} ${variants[variant]} ${className}`}
     >
       {children}

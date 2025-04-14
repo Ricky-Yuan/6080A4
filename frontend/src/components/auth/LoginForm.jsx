@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Input from '../common/Input';
 import Button from '../common/Button';
@@ -42,9 +42,14 @@ const LoginForm = () => {
           placeholder="Password"
           required
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" variant="primary" className="w-full">
           Login
         </Button>
+        <div className="text-center mt-4">
+          <Link to="/register" className="text-blue-600 hover:text-blue-700">
+            Don't have an account? Register here
+          </Link>
+        </div>
       </form>
 
       <Modal
