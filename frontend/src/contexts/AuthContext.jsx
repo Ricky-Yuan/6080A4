@@ -1,17 +1,28 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('currentUser');
+    }
+  }, [currentUser]);
 
   const login = async (email, password) => {
     setLoading(true);
     try {
       // TODO: Implement actual login logic with backend
       // For now, simulate a successful login
-      const user = { email };
+      const user = { email, name: email.split('@')[0] };
       setCurrentUser(user);
       return user;
     } catch (error) {
@@ -31,11 +42,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (email, password) => {
+  const register = async (email, password, name) => {
     setLoading(true);
     try {
       // TODO: Implement actual registration logic with backend
-      const user = { email };
+      const user = { email, name };
       setCurrentUser(user);
       return user;
     } catch (error) {

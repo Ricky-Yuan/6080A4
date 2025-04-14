@@ -24,8 +24,22 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
+      // 验证邮箱格式
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setError('Please enter a valid email address');
+        return;
+      }
+
+      // 验证姓名不为空
+      if (!name.trim()) {
+        setError('Name cannot be empty');
+        return;
+      }
+
       // TODO: Implement actual profile update logic with backend
       setIsEditing(false);
+      setError('');
     } catch (error) {
       setError('Failed to update profile');
     }
