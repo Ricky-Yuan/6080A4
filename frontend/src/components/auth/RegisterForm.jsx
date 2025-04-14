@@ -29,48 +29,65 @@ const RegisterForm = () => {
     }
   };
 
+  const handleCancel = () => {
+    navigate('/login');
+  };
+
   return (
-    <form 
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-4 max-w-md mx-auto p-8 bg-white rounded-lg shadow-md"
-    >
-      <Input
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-      />
-      <Input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <Input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <Input
-        type="password"
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        required
-      />
-      {error && (
-        <div className="text-red-500 text-sm">
-          {error}
+    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+      <form 
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4"
+      >
+        <Input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <Input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <Input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <Input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+        {error && (
+          <div className="text-red-500 text-sm">
+            {error}
+          </div>
+        )}
+        <div className="flex gap-2 mt-2">
+          <Button type="submit" variant="success" className="flex-1">
+            Register
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleCancel}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
         </div>
-      )}
-      <Button type="submit" variant="success">
-        Register
-      </Button>
-    </form>
+      </form>
+    </div>
   );
 };
 

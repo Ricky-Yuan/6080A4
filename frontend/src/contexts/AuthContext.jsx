@@ -37,8 +37,13 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setLoading(true);
     try {
-      await apiLogout();
       setCurrentUser(null);
+      localStorage.removeItem('currentUser');
+      try {
+        await apiLogout();
+      } catch (error) {
+        console.warn('Backend logout failed:', error);
+      }
     } finally {
       setLoading(false);
     }
