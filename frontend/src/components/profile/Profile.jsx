@@ -67,6 +67,46 @@ const Profile = () => {
                 </div>
               )}
             </div>
+
+            {error && (
+              <div className="mb-4 text-red-500 text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                {isEditing ? (
+                  <Input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="mt-1"
+                  />
+                ) : (
+                  <p className="mt-1 text-gray-900">{name}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                {isEditing ? (
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1"
+                  />
+                ) : (
+                  <p className="mt-1 text-gray-900">{email}</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
