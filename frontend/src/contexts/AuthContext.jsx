@@ -1,59 +1,63 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { login as loginApi, register as registerApi, logout as logoutApi, getCurrentUser } from '../api/auth';
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const userData = await getCurrentUser();
-          setUser(userData);
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-  }, []);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const login = async (email, password) => {
-    const response = await loginApi(email, password);
-    localStorage.setItem('token', response.token);
-    setUser(response.user);
-    return response;
-  };
-
-  const register = async (email, password, name) => {
-    const response = await registerApi(email, password, name);
-    localStorage.setItem('token', response.token);
-    setUser(response.user);
-    return response;
+    setLoading(true);
+    try {
+      // TODO: Implement actual login logic with backend
+      // For now, simulate a successful login
+      const user = { email };
+      setCurrentUser(user);
+      return user;
+    } catch (error) {
+      throw new Error('Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = async () => {
-    await logoutApi();
-    localStorage.removeItem('token');
-    setUser(null);
+    setLoading(true);
+    try {
+      // TODO: Implement actual logout logic with backend
+      setCurrentUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (email, password) => {
+    setLoading(true);
+    try {
+      // TODO: Implement actual registration logic with backend
+      const user = { email };
+      setCurrentUser(user);
+      return user;
+    } catch (error) {
+      throw new Error('Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const value = {
-    user,
+    currentUser,
     loading,
     login,
-    register,
     logout,
+    register
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
@@ -62,4 +66,6 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+};
+
+export default AuthContext; 
