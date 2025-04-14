@@ -1,7 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import Navbar from '../common/Navbar';
+import Button from '../common/Button';
 
 const Dashboard = () => {
   const { currentUser, logout } = useAuth();
@@ -18,7 +18,32 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar currentPage="dashboard" onLogout={handleLogout} />
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <span className="text-xl font-bold text-gray-800">BigBrain</span>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <Link
+                to="/profile"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Profile
+              </Link>
+              <Button
+                onClick={handleLogout}
+                variant="danger"
+                className="ml-4"
+              >
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
