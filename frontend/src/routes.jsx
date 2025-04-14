@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
+import Dashboard from './components/dashboard/Dashboard';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -36,7 +37,7 @@ const AppRoutes = () => {
       <Route path="/" element={<PublicRoute><LoginForm /></PublicRoute>} />
       <Route path="/login" element={<PublicRoute><LoginForm /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><RegisterForm /></PublicRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><div>Dashboard (to be implemented)</div></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><div>Profile (to be implemented)</div></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
