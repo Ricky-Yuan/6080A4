@@ -15,4 +15,14 @@ export const register = async (email, password, name) => {
     name,
   });
   return response.data;
+};
+
+export const logout = async () => {
+  const response = await apiClient.post('/admin/auth/logout');
+  return response.data;
+};
+
+export const getCurrentUser = async () => {
+  const response = await apiClient.get('/admin/auth/current');
+  return response.data;
 }; 
