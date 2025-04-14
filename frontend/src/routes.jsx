@@ -1,83 +1,45 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
 
-// 受保护的路由组件
+// Protected route component
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { currentUser } = useAuth();
+  const location = useLocation();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/login" />;
+  if (!currentUser) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;
 };
 
-// 公共路由组件
+// Public route component
 const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { currentUser } = useAuth();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/dashboard';
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (user) {
-    return <Navigate to="/dashboard" />;
+  if (currentUser) {
+    return <Navigate to={from} replace />;
   }
 
   return children;
 };
 
-// 路由配置
+// Route configuration
 const AppRoutes = () => {
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <LoginForm />
-              </div>
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <RegisterForm />
-              </div>
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <div>Dashboard (to be implemented)</div>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<PublicRoute><LoginForm /></PublicRoute>} />
+      <Route path="/login" element={<PublicRoute><LoginForm /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><RegisterForm /></PublicRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><div>Dashboard (to be implemented)</div></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><div>Profile (to be implemented)</div></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 
