@@ -1,42 +1,6 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 2rem;
-`;
-
-const Input = styled.input`
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-`;
-
-const Button = styled.button`
-  padding: 0.75rem;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-
-  &:hover {
-    background-color: #218838;
-  }
-`;
-
-const ErrorMessage = styled.div`
-  color: #dc3545;
-  font-size: 0.875rem;
-`;
 
 const RegisterForm = () => {
   const [name, setName] = useState('');
@@ -64,38 +28,54 @@ const RegisterForm = () => {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <Input
+    <form 
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-4 max-w-md mx-auto p-8 bg-white rounded-lg shadow-md"
+    >
+      <input
         type="text"
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-      <Input
+      <input
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-      <Input
+      <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-      <Input
+      <input
         type="password"
         placeholder="Confirm Password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
+        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-      {error && <ErrorMessage>{error}</ErrorMessage>}
-      <Button type="submit">Register</Button>
-    </Form>
+      {error && (
+        <div className="text-red-500 text-sm">
+          {error}
+        </div>
+      )}
+      <button
+        type="submit"
+        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+      >
+        Register
+      </button>
+    </form>
   );
 };
 
