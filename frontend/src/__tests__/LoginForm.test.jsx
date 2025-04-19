@@ -64,4 +64,46 @@ describe('LoginForm', () => {
       expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
     });
   });
+
+  test('successful login redirects user', async () => {
+    const mockResponse = {
+      token: 'fake-token',
+      userId: '123',
+      email: 'test@example.com',
+    };
+
+    global.fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      })
+    );
+
+    renderLoginForm();
+    
+    // Fill in the form
+    fireEvent.change(screen.getByPlaceholderText('Email'), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Password'), {
+      target: { value: 'password123' },
+    });
+    
+    // Submit the form
+    fireEvent.click(screen.getByRole('button', { name: /login/i }));
+    
+    // Verify fetch was called with correct parameters
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/admin/auth/login'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+          }),
+        })
+      );
+    });
+  });
 }); 
