@@ -44,12 +44,18 @@ const Dashboard = () => {
   };
 
   const handleCreateGame = async () => {
+    if (!newGameName.trim()) {
+      setError('Game name is required');
+      return;
+    }
+
     try {
       setIsLoading(true);
       const newGame = await createGame(newGameName);
       setGames([...games, newGame]);
       setIsCreateModalOpen(false);
       setNewGameName('');
+      setError('');
     } catch (error) {
       setError('Failed to create game');
     } finally {
