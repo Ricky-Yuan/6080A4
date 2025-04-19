@@ -1,11 +1,38 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getGames, createGame, deleteGame, startGame } from '../../api/game';
 import Button from '../common/Button';
+import Modal from '../common/Modal';
+import Input from '../common/Input';
+import GameCard from '../game/GameCard';
+import Navbar from '../common/Navbar';
 
 const Dashboard = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [games, setGames] = useState([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newGameName, setNewGameName] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load games when component mounts
+  useEffect(() => {
+    loadGames();
+  }, []);
+
+  const loadGames = async () => {
+    try {
+      setIsLoading(true);
+      const gamesData = await getGames();
+      setGames(gamesData);
+    } catch (error) {
+      setError('Failed to load games');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -16,47 +43,73 @@ const Dashboard = () => {
     }
   };
 
+  const handleCreateGame = async () => {
+    try {
+      setIsLoading(true);
+      const newGame = await createGame(newGameName);
+      setGames([...games, newGame]);
+      setIsCreateModalOpen(false);
+      setNewGameName('');
+    } catch (error) {
+      setError('Failed to create game');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteGame = async (gameId) => {
+    try {
+      setIsLoading(true);
+      await deleteGame(gameId);
+      setGames(games.filter(game => game.id !== gameId));
+    } catch (error) {
+      setError('Failed to delete game');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartGame = async (gameId) => {
+    try {
+      setIsLoading(true);
+      const response = await startGame(gameId);
+      // Show session ID in a modal or alert
+      alert(`Game started! Session ID: ${response.sessionId}`);
+    } catch (error) {
+      setError('Failed to start game');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold text-gray-800">BigBrain</span>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <Link
-                to="/profile"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Profile
-              </Link>
-              <Button
-                onClick={handleLogout}
-                variant="danger"
-                className="ml-4"
-              >
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar currentPage="dashboard" onLogout={handleLogout} />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg h-96 p-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Welcome, {currentUser?.name || 'User'}!
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Your Games
             </h1>
-            <p className="text-gray-600">
-              This is your dashboard. More features coming soon!
-            </p>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              variant="primary"
+            >
+              Create New Game
+            </Button>
           </div>
+
+          {error && (
+            <div className="mb-4 text-red-500">
+              {error}
+            </div>
+          )}
+
+
         </div>
       </main>
+
     </div>
   );
 };
