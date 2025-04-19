@@ -59,4 +59,60 @@ describe('RegisterForm', () => {
     // Check for error message
     expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
   });
+
+  test('successful registration calls API with correct data', async () => {
+    const mockResponse = {
+      token: 'fake-token',
+      userId: '123',
+      email: 'test@example.com',
+    };
+
+    global.fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      })
+    );
+
+    renderRegisterForm();
+    
+    // Fill in the form
+    fireEvent.change(screen.getByPlaceholderText('Email'), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Password'), {
+      target: { value: 'password123' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), {
+      target: { value: 'password123' },
+    });
+    
+    // Submit the form
+    fireEvent.click(screen.getByRole('button', { name: /register/i }));
+    
+    // Verify API call
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/admin/auth/register'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+          }),
+          body: expect.stringContaining('test@example.com'),
+        })
+      );
+    });
+  });
+
+  test('cancel button redirects to login page', () => {
+    renderRegisterForm();
+    
+    // Click cancel button
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    
+    // Verify we're redirected to login page
+    expect(window.location.pathname).toBe('/login');
+  });
 }); 
