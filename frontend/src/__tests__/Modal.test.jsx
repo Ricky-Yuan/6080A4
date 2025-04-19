@@ -54,4 +54,37 @@ describe('Modal', () => {
     
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  test('calls onConfirm when OK button is clicked', () => {
+    const onConfirm = jest.fn();
+    render(<Modal {...defaultProps} onConfirm={onConfirm} />);
+    
+    fireEvent.click(screen.getByRole('button', { name: /ok/i }));
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  test('renders custom button labels when provided', () => {
+    render(
+      <Modal
+        {...defaultProps}
+        cancelText="Go Back"
+        confirmText="Continue"
+      />
+    );
+    
+    expect(screen.getByRole('button', { name: /go back/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
+  });
+
+  test('prevents event propagation when clicking modal content', () => {
+    const onClose = jest.fn();
+    render(<Modal {...defaultProps} onClose={onClose} />);
+    
+    // Click the modal content
+    const modalContent = screen.getByText('Modal Content');
+    fireEvent.click(modalContent);
+    
+    // onClose should not be called when clicking inside the modal
+    expect(onClose).not.toHaveBeenCalled();
+  });
 }); 
