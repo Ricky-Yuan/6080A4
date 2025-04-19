@@ -106,10 +106,42 @@ const Dashboard = () => {
             </div>
           )}
 
-
+          {isLoading ? (
+            <div className="text-center py-4">Loading...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {games.map(game => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  onDelete={handleDeleteGame}
+                  onStart={handleStartGame}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setNewGameName('');
+          setError('');
+        }}
+        title="Create New Game"
+        onConfirm={handleCreateGame}
+        confirmText="Create"
+      >
+        <Input
+          type="text"
+          placeholder="Game Name"
+          value={newGameName}
+          onChange={(e) => setNewGameName(e.target.value)}
+          required
+        />
+      </Modal>
     </div>
   );
 };
