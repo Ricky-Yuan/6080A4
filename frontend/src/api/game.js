@@ -6,7 +6,7 @@ export const getGames = async () => {
   if (Array.isArray(response)) {
     return response;
   }
-  // 如果返回的是对象形式，转换为数组
+  // If response is an object, convert to array
   if (response && typeof response === 'object' && response.games) {
     return response.games;
   }
@@ -23,40 +23,80 @@ export const createGame = async (name) => {
       questions: []
     }]
   });
-  return response;
+  // After creating the game, fetch the updated game list and return the newly created game
+  const games = await getGames();
+  return games[games.length - 1];
 };
 
 // Delete a game
 export const deleteGame = async (gameId) => {
-  await apiClient.delete(`/admin/quiz/${gameId}`);
+  const email = JSON.parse(localStorage.getItem('currentUser')).email;
+  // First get all games
+  const allGames = await getGames();
+  // Filter out the game to be deleted
+  const remainingGames = allGames.filter(game => game.id.toString() !== gameId.toString());
+  // Update the game list
+  await apiClient.put('/admin/games', {
+    games: remainingGames.map(game => ({
+      ...game,
+      owner: email
+    }))
+  });
 };
 
 // Get game details
 export const getGameById = async (gameId) => {
-  const response = await apiClient.get(`/admin/quiz/${gameId}`);
-  return response;
+  const games = await getGames();
+  const game = games.find(g => g.id.toString() === gameId.toString());
+  if (!game) {
+    throw new Error('Game not found');
+  }
+  return game;
 };
 
 // Update game details
 export const updateGame = async (gameId, data) => {
-  const response = await apiClient.put(`/admin/quiz/${gameId}`, data);
-  return response;
+  const email = JSON.parse(localStorage.getItem('currentUser')).email;
+  const allGames = await getGames();
+  const gameIndex = allGames.findIndex(g => g.id.toString() === gameId.toString());
+  
+  if (gameIndex === -1) {
+    throw new Error('Game not found');
+  }
+
+  // Update game data
+  allGames[gameIndex] = {
+    ...allGames[gameIndex],
+    ...data,
+    owner: email,
+    id: gameId
+  };
+
+  // Update game list
+  await apiClient.put('/admin/games', {
+    games: allGames.map(game => ({
+      ...game,
+      owner: email
+    }))
+  });
+
+  return allGames[gameIndex];
 };
 
 // Start game session
 export const startGame = async (gameId) => {
-  const response = await apiClient.post(`/admin/quiz/${gameId}/start`);
+  const response = await apiClient.post(`/admin/game/${gameId}/mutate`, { mutationType: 'start' });
   return response;
 };
 
 // End game session
 export const endGame = async (gameId) => {
-  const response = await apiClient.post(`/admin/quiz/${gameId}/end`);
+  const response = await apiClient.post(`/admin/game/${gameId}/mutate`, { mutationType: 'end' });
   return response;
 };
 
 // Get game status
 export const getGameStatus = async (gameId) => {
-  const response = await apiClient.get(`/admin/quiz/${gameId}/status`);
+  const response = await apiClient.get(`/admin/game/${gameId}/status`);
   return response;
 }; 
