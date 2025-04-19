@@ -1,46 +1,33 @@
 import React from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import LoginForm from './components/auth/LoginForm';
-import RegisterForm from './components/auth/RegisterForm';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
-import Profile from './components/profile/Profile';
+import GameEditor from './components/game/GameEditor';
 
-// Protected route component
-const ProtectedRoute = ({ children }) => {
-  const { currentUser } = useAuth();
-  const location = useLocation();
-
-  if (!currentUser) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  return children;
-};
-
-// Public route component
-const PublicRoute = ({ children }) => {
-  const { currentUser } = useAuth();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || '/dashboard';
-
-  if (currentUser) {
-    return <Navigate to={from} replace />;
-  }
-
-  return children;
-};
-
-// Route configuration
 const AppRoutes = () => {
+  const { currentUser } = useAuth();
+
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<PublicRoute><LoginForm /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><RegisterForm /></PublicRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route
+        path="/login"
+        element={currentUser ? <Navigate to="/dashboard" /> : <Login />}
+      />
+      <Route
+        path="/register"
+        element={currentUser ? <Navigate to="/dashboard" /> : <Register />}
+      />
+      <Route
+        path="/dashboard"
+        element={currentUser ? <Dashboard /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/game/:gameId"
+        element={currentUser ? <GameEditor /> : <Navigate to="/login" />}
+      />
+      <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 };
