@@ -46,6 +46,14 @@ const GameEditor = () => {
     navigate('/dashboard');
   };
 
+  const handleNameChange = (e) => {
+    setGame({ ...game, name: e.target.value });
+  };
+
+  const handleThumbnailChange = (e) => {
+    setGame({ ...game, thumbnail: e.target.value });
+  };
+
   if (isLoading) {
     return <div className="text-center py-4">Loading...</div>;
   }
@@ -59,8 +67,51 @@ const GameEditor = () => {
       <Navbar currentPage="game-editor" />
       
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="bg-white shadow-sm rounded-lg p-6">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Game Details</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Game Name
+                </label>
+                <Input
+                  type="text"
+                  value={game?.name || ''}
+                  onChange={handleNameChange}
+                  placeholder="Enter game name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Thumbnail URL
+                </label>
+                <Input
+                  type="text"
+                  value={game?.thumbnail || ''}
+                  onChange={handleThumbnailChange}
+                  placeholder="Enter thumbnail URL"
+                />
+              </div>
+            </div>
+          </div>
 
-  
+          <div className="flex justify-end gap-4">
+            <Button
+              onClick={handleCancel}
+              variant="secondary"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="success"
+            >
+              Save Changes
+            </Button>
+          </div>
+        </div>
       </main>
     </div>
   );
