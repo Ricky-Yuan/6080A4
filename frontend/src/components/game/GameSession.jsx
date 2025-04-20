@@ -29,7 +29,6 @@ const GameSession = () => {
     }
   };
 
-  // Poll for session status every 5 seconds
   useEffect(() => {
     if (sessionId) {
       fetchSessionStatus();
@@ -61,22 +60,23 @@ const GameSession = () => {
       console.log('GameSession - Start game response:', response);
       
       // Extract sessionId from response based on backend API structure
-      const sessionId = response?.data?.sessionId || response?.result?.sessionId || response?.sessionId;
-      console.log('GameSession - Extracted sessionId:', sessionId);
+      const newSessionId = response?.data?.sessionId;
+      console.log('GameSession - Extracted sessionId:', newSessionId);
 
-      if (sessionId) {
-        setSessionId(sessionId);
-        // Use the sessionId for status updates
-        try {
-          await getGameStatus(sessionId);
-          console.log('GameSession - Initial session status fetched successfully');
-        } catch (error) {
-          console.error('GameSession - Failed to fetch initial session status:', error);
-          // Continue even if status fetch fails
-        }
-      } else {
+      if (!newSessionId) {
         console.error('GameSession - Invalid response structure:', response);
         throw new Error('Failed to get session ID from response');
+      }
+
+      setSessionId(newSessionId);
+      // Use the sessionId for status updates
+      try {
+        const initialStatus = await getGameStatus(newSessionId);
+        console.log('GameSession - Initial session status:', initialStatus);
+        setSessionStatus(initialStatus);
+      } catch (error) {
+        console.error('GameSession - Failed to fetch initial session status:', error);
+        setError('Failed to fetch initial session status');
       }
     } catch (error) {
       console.error('GameSession - Error starting game:', error);
