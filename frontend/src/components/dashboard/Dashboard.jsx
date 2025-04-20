@@ -78,9 +78,8 @@ const Dashboard = () => {
   const handleStartGame = async (gameId) => {
     try {
       setIsLoading(true);
-      const response = await startGame(gameId);
-      // Show session ID in a modal or alert
-      alert(`Game started! Session ID: ${response.sessionId}`);
+      // Navigate to game session page
+      navigate(`/game/${gameId}`);
     } catch (error) {
       setError('Failed to start game');
     } finally {

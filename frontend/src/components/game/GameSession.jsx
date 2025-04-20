@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { startGame, endGame, getGameStatus, getGames } from '../../api/game';
-import Button from '../common/Button';
+import { startGame, endGame, getGameStatus } from '../../api/game';
+import { 
+  Box, 
+  Typography, 
+  CircularProgress, 
+  Container,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Grid,
+  Divider
+} from '@mui/material';
 import PlayerList from './PlayerList';
 import QuestionDisplay from './QuestionDisplay';
 
