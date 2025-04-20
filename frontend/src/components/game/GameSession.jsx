@@ -1,19 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { startGame, endGame, getGameStatus } from '../../api/game';
-import { 
-  Box, 
-  Typography, 
-  CircularProgress, 
-  Container,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Grid,
-  Divider
-} from '@mui/material';
+import Button from '../common/Button';
 import PlayerList from './PlayerList';
 import QuestionDisplay from './QuestionDisplay';
 
@@ -25,20 +13,35 @@ const GameSession = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-
   const fetchSessionStatus = async () => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      console.log('GameSession - No sessionId available, skipping status fetch');
+      return;
+    }
     try {
+      console.log('GameSession - Fetching status for session:', sessionId);
       const status = await getGameStatus(sessionId);
+      console.log('GameSession - Received status:', status);
       setSessionStatus(status);
     } catch (error) {
+      console.error('GameSession - Failed to fetch session status:', error);
       setError('Failed to fetch session status');
     }
   };
 
+  // Poll for session status every 5 seconds
+  useEffect(() => {
+    if (sessionId) {
+      fetchSessionStatus();
+      const interval = setInterval(fetchSessionStatus, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [sessionId]);
+
   const handleStartGame = async () => {
     try {
       setIsLoading(true);
+      setError('');
       console.log('GameSession - Starting game with ID:', gameId);
       
       try {
@@ -56,15 +59,28 @@ const GameSession = () => {
       // Start a new session
       const response = await startGame(gameId);
       console.log('GameSession - Start game response:', response);
-      if (response.data && response.data.sessionId) {
-        setSessionId(response.data.sessionId);
-        await fetchSessionStatus();
+      
+      // Extract sessionId from response based on backend API structure
+      const sessionId = response?.data?.sessionId || response?.result?.sessionId || response?.sessionId;
+      console.log('GameSession - Extracted sessionId:', sessionId);
+
+      if (sessionId) {
+        setSessionId(sessionId);
+        // Use the sessionId for status updates
+        try {
+          await getGameStatus(sessionId);
+          console.log('GameSession - Initial session status fetched successfully');
+        } catch (error) {
+          console.error('GameSession - Failed to fetch initial session status:', error);
+          // Continue even if status fetch fails
+        }
       } else {
-        throw new Error('Failed to get session ID');
+        console.error('GameSession - Invalid response structure:', response);
+        throw new Error('Failed to get session ID from response');
       }
     } catch (error) {
       console.error('GameSession - Error starting game:', error);
-      setError('Failed to start game');
+      setError(`Failed to start game: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -83,15 +99,6 @@ const GameSession = () => {
       setIsLoading(false);
     }
   };
-
-  // 定期更新会话状态
-  useEffect(() => {
-    if (sessionId) {
-      fetchSessionStatus();
-      const interval = setInterval(fetchSessionStatus, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [sessionId]);
 
   if (isLoading) {
     return <div className="text-center py-4">Loading...</div>;

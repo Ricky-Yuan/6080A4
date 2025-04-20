@@ -1,24 +1,29 @@
 import React from 'react';
 
-const PlayerList = ({ players = [] }) => {
+const PlayerList = ({ players }) => {
+  if (!players || players.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-lg font-semibold mb-2">Players</h3>
+        <p className="text-gray-500">No players have joined yet.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      <h3 className="text-lg font-semibold mb-4">Players</h3>
-      {players.length === 0 ? (
-        <p className="text-gray-500">Waiting for players to join...</p>
-      ) : (
-        <ul className="space-y-2">
-          {players.map((player, index) => (
-            <li
-              key={index}
-              className="flex items-center justify-between p-2 bg-gray-50 rounded"
-            >
-              <span className="text-gray-800">{player}</span>
-              <span className="text-sm text-gray-500">#{index + 1}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="bg-white rounded-lg shadow p-4">
+      <h3 className="text-lg font-semibold mb-2">Players</h3>
+      <div className="space-y-2">
+        {players.map((player, index) => (
+          <div
+            key={player.id}
+            className="flex justify-between items-center p-2 bg-gray-50 rounded"
+          >
+            <span className="font-medium">Player {index + 1}</span>
+            <span className="text-sm text-gray-600">ID: {player.id}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
