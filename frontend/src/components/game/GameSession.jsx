@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { startGame, endGame, getGameStatus } from '../../api/game';
 import Button from '../common/Button';
 import PlayerList from './PlayerList';
+import QuestionDisplay from './QuestionDisplay';
 
 const GameSession = () => {
   const { gameId } = useParams();
@@ -86,9 +87,17 @@ const GameSession = () => {
         ) : (
           <div className="space-y-6">
             <PlayerList players={sessionStatus?.players || []} />
+            
+            {sessionStatus && (
+              <QuestionDisplay
+                question={sessionStatus.questions?.[sessionStatus.position]}
+                position={sessionStatus.position}
+                totalQuestions={sessionStatus.questions?.length || 0}
+              />
+            )}
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Session Status</h3>
+              <h3 className="text-lg font-semibold mb-2">Debug Info</h3>
               <pre className="text-sm">
                 {JSON.stringify(sessionStatus, null, 2)}
               </pre>
