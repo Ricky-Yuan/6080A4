@@ -1,52 +1,43 @@
 import React from 'react';
 
 const QuestionDisplay = ({ question, position, totalQuestions }) => {
-  if (!question) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <p className="text-gray-500 text-center">
-          {position === -1 ? 'Game not started' : 'Game ended'}
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold">Question {position + 1}</h3>
-        <span className="text-sm text-gray-500">
-          {position + 1} / {totalQuestions}
-        </span>
-      </div>
-
-      <div className="mb-6">
-        <p className="text-lg mb-2">{question.text}</p>
-        {question.image && (
-          <img
-            src={question.image}
-            alt="Question"
-            className="w-full h-48 object-cover rounded-lg mb-4"
-          />
-        )}
-        <div className="text-sm text-gray-500">
-          Time limit: {question.duration} seconds
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        {question.answers.map((answer, index) => (
-          <div
-            key={index}
-            className="p-3 bg-gray-50 rounded-lg flex items-center"
-          >
-            <span className="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-800 rounded-full mr-3">
-              {String.fromCharCode(65 + index)}
+    <div className="bg-white rounded-lg shadow p-4">
+      <h3 className="text-lg font-semibold mb-2">Current Question</h3>
+      
+      {question ? (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">
+              Question {position + 1} of {totalQuestions}
             </span>
-            <span>{answer.text}</span>
+            <span className="text-sm text-gray-600">
+              Points: {question.points || 0}
+            </span>
           </div>
-        ))}
-      </div>
+          
+          <div className="p-4 bg-gray-50 rounded">
+            <p className="text-lg">{question.text}</p>
+          </div>
+
+          {question.answers && (
+            <div className="space-y-2">
+              <p className="font-medium">Answers:</p>
+              {question.answers.map((answer, index) => (
+                <div
+                  key={answer.id}
+                  className="p-2 bg-white border border-gray-200 rounded flex items-center"
+                >
+                  <span className="mr-2">{String.fromCharCode(65 + index)}.</span>
+                  <span>{answer.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <p className="text-gray-500">Waiting for the game to start...</p>
+      )}
     </div>
   );
 };

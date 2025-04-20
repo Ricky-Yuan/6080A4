@@ -5,6 +5,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
 import GameEditor from './components/game/GameEditor';
+import GameSession from './components/game/GameSession';
 
 const AppRoutes = () => {
   const { currentUser } = useAuth();
@@ -24,8 +25,12 @@ const AppRoutes = () => {
         element={currentUser ? <Dashboard /> : <Navigate to="/login" />}
       />
       <Route
-        path="/game/:gameId"
+        path="/game/:gameId/edit"
         element={currentUser ? <GameEditor /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/game/:gameId/play"
+        element={currentUser ? <GameSession /> : <Navigate to="/login" />}
       />
       <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>

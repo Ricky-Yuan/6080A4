@@ -6,7 +6,7 @@ const GameCard = ({ game, onDelete, onStart }) => {
   const navigate = useNavigate();
 
   const handleEdit = () => {
-    navigate(`/game/${game.id}`);
+    navigate(`/game/${game.id}/edit`);
   };
 
   return (

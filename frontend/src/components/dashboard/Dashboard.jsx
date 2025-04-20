@@ -78,8 +78,8 @@ const Dashboard = () => {
   const handleStartGame = async (gameId) => {
     try {
       setIsLoading(true);
-      // Navigate to game session page
-      navigate(`/game/${gameId}`);
+      // Navigate to game session page with correct path
+      navigate(`/game/${gameId}/play`);
     } catch (error) {
       setError('Failed to start game');
     } finally {
