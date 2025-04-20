@@ -51,8 +51,8 @@ const Dashboard = () => {
 
     try {
       setIsLoading(true);
-      const newGame = await createGame(newGameName);
-      setGames([...games, newGame]);
+      await createGame(newGameName);
+      await loadGames();
       setIsCreateModalOpen(false);
       setNewGameName('');
       setError('');
