@@ -129,6 +129,74 @@ const GameEditor = () => {
             </div>
           </div>
 
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Questions</h2>
+              <Button
+                onClick={handleAddQuestion}
+                variant="primary"
+              >
+                Add Question
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {game?.questions?.map((question, index) => (
+                <div key={question.id} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-semibold">Question {index + 1}</h3>
+                    <Button
+                      onClick={() => handleDeleteQuestion(index)}
+                      variant="danger"
+                      className="text-sm"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Question Text
+                      </label>
+                      <Input
+                        type="text"
+                        value={question.text}
+                        onChange={(e) => handleQuestionChange(index, 'text', e.target.value)}
+                        placeholder="Enter question text"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Time Limit (seconds)
+                        </label>
+                        <Input
+                          type="number"
+                          value={question.timeLimit}
+                          onChange={(e) => handleQuestionChange(index, 'timeLimit', parseInt(e.target.value))}
+                          min="1"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Points
+                        </label>
+                        <Input
+                          type="number"
+                          value={question.points}
+                          onChange={(e) => handleQuestionChange(index, 'points', parseInt(e.target.value))}
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="flex justify-end gap-4">
             <Button
               onClick={handleCancel}
