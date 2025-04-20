@@ -1,4 +1,5 @@
 import apiClient from './index';
+import axios from 'axios';
 
 // Get all games
 export const getGames = async () => {
@@ -110,7 +111,14 @@ export const endGame = async (gameId) => {
 };
 
 // Get game status
-export const getGameStatus = async (gameId) => {
-  const response = await apiClient.get(`/admin/game/${gameId}/status`);
-  return response;
+export const getGameStatus = async (sessionId) => {
+  const response = await apiClient.get(`/admin/session/${sessionId}/status`);
+  return response.results;
+};
+
+export const joinGame = async (sessionId, playerName) => {
+  const response = await axios.post(`/play/join/${sessionId}`, {
+    name: playerName
+  });
+  return response.data;
 }; 

@@ -4,6 +4,7 @@ import { startGame, endGame, getGameStatus } from '../../api/game';
 import Button from '../common/Button';
 import PlayerList from './PlayerList';
 import QuestionDisplay from './QuestionDisplay';
+import JoinGame from './JoinGame';
 
 const GameSession = () => {
   const { gameId } = useParams();
@@ -12,6 +13,7 @@ const GameSession = () => {
   const [sessionStatus, setSessionStatus] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [playerId, setPlayerId] = useState(null);
 
   const fetchSessionStatus = async () => {
     if (!sessionId) {
@@ -36,6 +38,12 @@ const GameSession = () => {
       return () => clearInterval(interval);
     }
   }, [sessionId]);
+
+  const handlePlayerJoined = (newPlayerId) => {
+    setPlayerId(newPlayerId);
+    // 刷新会话状态以显示新玩家
+    fetchSessionStatus();
+  };
 
   const handleStartGame = async () => {
     try {
@@ -126,14 +134,23 @@ const GameSession = () => {
           </Button>
         ) : (
           <div className="space-y-6">
-            <PlayerList players={sessionStatus?.players || []} />
-            
-            {sessionStatus && (
-              <QuestionDisplay
-                question={sessionStatus.questions?.[sessionStatus.position]}
-                position={sessionStatus.position}
-                totalQuestions={sessionStatus.questions?.length || 0}
+            {!playerId && sessionStatus?.position === -1 ? (
+              <JoinGame 
+                sessionId={sessionId} 
+                onPlayerJoined={handlePlayerJoined} 
               />
+            ) : (
+              <>
+                <PlayerList players={sessionStatus?.players || []} />
+                
+                {sessionStatus && (
+                  <QuestionDisplay
+                    question={sessionStatus.questions?.[sessionStatus.position]}
+                    position={sessionStatus.position}
+                    totalQuestions={sessionStatus.questions?.length || 0}
+                  />
+                )}
+              </>
             )}
 
             <div className="bg-gray-50 p-4 rounded-lg">
