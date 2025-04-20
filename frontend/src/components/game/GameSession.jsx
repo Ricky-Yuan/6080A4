@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { startGame, endGame, getGameStatus } from '../../api/game';
 import Button from '../common/Button';
+import PlayerList from './PlayerList';
 
 const GameSession = () => {
   const { gameId } = useParams();
@@ -84,6 +85,8 @@ const GameSession = () => {
           </Button>
         ) : (
           <div className="space-y-6">
+            <PlayerList players={sessionStatus?.players || []} />
+
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="text-lg font-semibold mb-2">Session Status</h3>
               <pre className="text-sm">
