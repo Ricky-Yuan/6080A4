@@ -86,6 +86,41 @@ const GameEditor = () => {
     setGame({ ...game, questions: updatedQuestions });
   };
 
+  const handleAnswerChange = (questionIndex, answerIndex, field, value) => {
+    const updatedQuestions = [...game.questions];
+    const answers = [...updatedQuestions[questionIndex].answers];
+    answers[answerIndex] = {
+      ...answers[answerIndex],
+      [field]: value
+    };
+    updatedQuestions[questionIndex] = {
+      ...updatedQuestions[questionIndex],
+      answers
+    };
+    setGame({ ...game, questions: updatedQuestions });
+  };
+
+  const handleAddAnswer = (questionIndex) => {
+    const updatedQuestions = [...game.questions];
+    const newAnswer = {
+      id: Date.now(),
+      text: '',
+      isCorrect: false
+    };
+    updatedQuestions[questionIndex].answers.push(newAnswer);
+    setGame({ ...game, questions: updatedQuestions });
+  };
+
+  const handleDeleteAnswer = (questionIndex, answerIndex) => {
+    const updatedQuestions = [...game.questions];
+    const answers = updatedQuestions[questionIndex].answers.filter((_, i) => i !== answerIndex);
+    updatedQuestions[questionIndex] = {
+      ...updatedQuestions[questionIndex],
+      answers
+    };
+    setGame({ ...game, questions: updatedQuestions });
+  };
+
   if (isLoading) {
     return <div className="text-center py-4">Loading...</div>;
   }
@@ -191,6 +226,59 @@ const GameEditor = () => {
                         />
                       </div>
                     </div>
+
+                    <div className="border-t pt-4 mt-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <label className="block text-lg font-medium text-gray-900">
+                          Answers
+                        </label>
+                        <Button
+                          onClick={() => handleAddAnswer(index)}
+                          variant="primary"
+                          className="text-sm"
+                        >
+                          Add Answer
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        {question.answers.map((answer, answerIndex) => (
+                          <div key={answer.id} className="flex items-start gap-3 bg-white p-3 rounded-lg border">
+                            <div className="flex-1">
+                              <Input
+                                type="text"
+                                value={answer.text}
+                                onChange={(e) => handleAnswerChange(index, answerIndex, 'text', e.target.value)}
+                                placeholder={`Answer ${answerIndex + 1}`}
+                              />
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <label className="flex items-center gap-2 whitespace-nowrap">
+                                <input
+                                  type="checkbox"
+                                  checked={answer.isCorrect}
+                                  onChange={(e) => handleAnswerChange(index, answerIndex, 'isCorrect', e.target.checked)}
+                                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="text-sm font-medium text-gray-700">Correct Answer</span>
+                              </label>
+                              <Button
+                                onClick={() => handleDeleteAnswer(index, answerIndex)}
+                                variant="danger"
+                                className="text-sm"
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {question.answers.length === 0 && (
+                          <div className="text-center text-gray-500 py-4">
+                            No answers yet. Click "Add Answer" to add one.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               ))}
