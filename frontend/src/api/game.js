@@ -16,16 +16,27 @@ export const getGames = async () => {
 // Create a new game
 export const createGame = async (name) => {
   const email = JSON.parse(localStorage.getItem('currentUser')).email;
-  const response = await apiClient.put('/admin/games', {
-    games: [{
-      name,
-      owner: email,
-      questions: []
-    }]
+  // First get all existing games
+  const existingGames = await getGames();
+  
+  // Create new game object
+  const newGame = {
+    name,
+    owner: email,
+    questions: []
+  };
+
+  // Update games list with the new game
+  await apiClient.put('/admin/games', {
+    games: [...existingGames, newGame].map(game => ({
+      ...game,
+      owner: email
+    }))
   });
-  // After creating the game, fetch the updated game list and return the newly created game
-  const games = await getGames();
-  return games[games.length - 1];
+
+  // Get updated games list and return the new game
+  const updatedGames = await getGames();
+  return updatedGames[updatedGames.length - 1];
 };
 
 // Delete a game
