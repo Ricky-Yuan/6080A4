@@ -96,7 +96,10 @@ export const updateGame = async (gameId, data) => {
 
 // Start game session
 export const startGame = async (gameId) => {
+  console.log('Starting game with ID:', gameId);
+  console.log('Request body:', { mutationType: 'start' });
   const response = await apiClient.post(`/admin/game/${gameId}/mutate`, { mutationType: 'start' });
+  console.log('Start game response:', response);
   return response;
 };
 
