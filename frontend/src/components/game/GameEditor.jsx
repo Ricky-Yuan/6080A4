@@ -58,11 +58,31 @@ const GameEditor = () => {
     const newQuestion = {
       id: Date.now(), // Temporary ID for frontend use
       text: '',
+      type: 'multiple-choice', // 'multiple-choice' or 'true-false'
       timeLimit: 30,
       points: 10,
       answers: [
         { id: 1, text: '', isCorrect: false },
         { id: 2, text: '', isCorrect: false }
+      ]
+    };
+
+    setGame({
+      ...game,
+      questions: [...(game.questions || []), newQuestion]
+    });
+  };
+
+  const handleAddTrueFalseQuestion = () => {
+    const newQuestion = {
+      id: Date.now(),
+      text: '',
+      type: 'true-false',
+      timeLimit: 30,
+      points: 10,
+      answers: [
+        { id: 1, text: 'True', isCorrect: false },
+        { id: 2, text: 'False', isCorrect: false }
       ]
     };
 
@@ -167,19 +187,34 @@ const GameEditor = () => {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900">Questions</h2>
-              <Button
-                onClick={handleAddQuestion}
-                variant="primary"
-              >
-                Add Question
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAddQuestion}
+                  variant="primary"
+                  className="text-sm"
+                >
+                  Add Multiple Choice
+                </Button>
+                <Button
+                  onClick={handleAddTrueFalseQuestion}
+                  variant="primary"
+                  className="text-sm"
+                >
+                  Add True/False
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-4">
               {game?.questions?.map((question, index) => (
                 <div key={question.id} className="border rounded-lg p-4 bg-gray-50">
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold">Question {index + 1}</h3>
+                    <div>
+                      <h3 className="text-lg font-semibold">Question {index + 1}</h3>
+                      <p className="text-sm text-gray-600">
+                        {question.type === 'true-false' ? 'True/False' : 'Multiple Choice'}
+                      </p>
+                    </div>
                     <Button
                       onClick={() => handleDeleteQuestion(index)}
                       variant="danger"
@@ -232,53 +267,64 @@ const GameEditor = () => {
                         <label className="block text-lg font-medium text-gray-900">
                           Answers
                         </label>
-                        <Button
-                          onClick={() => handleAddAnswer(index)}
-                          variant="primary"
-                          className="text-sm"
-                        >
-                          Add Answer
-                        </Button>
+                        {question.type === 'multiple-choice' && (
+                          <Button
+                            onClick={() => handleAddAnswer(index)}
+                            variant="primary"
+                            className="text-sm"
+                          >
+                            Add Answer
+                          </Button>
+                        )}
                       </div>
                       <div className="space-y-3">
                         {question.answers.map((answer, answerIndex) => (
                           <div key={answer.id} className="flex items-start gap-3 bg-white p-3 rounded-lg border">
                             <div className="flex-1">
-                              <Input
-                                type="text"
-                                value={answer.text}
-                                onChange={(e) => handleAnswerChange(index, answerIndex, 'text', e.target.value)}
-                                placeholder={`Answer ${answerIndex + 1}`}
-                              />
+                              {question.type === 'true-false' ? (
+                                <div className="text-gray-700 py-2 px-1">{answer.text}</div>
+                              ) : (
+                                <Input
+                                  type="text"
+                                  value={answer.text}
+                                  onChange={(e) => handleAnswerChange(index, answerIndex, 'text', e.target.value)}
+                                  placeholder={`Answer ${answerIndex + 1}`}
+                                />
+                              )}
                             </div>
                             <div className="flex items-center gap-4">
                               <label className="flex items-center gap-2 whitespace-nowrap">
                                 <input
-                                  type="checkbox"
+                                  type="radio"
+                                  name={`correct-answer-${question.id}`}
                                   checked={answer.isCorrect}
-                                  onChange={(e) => handleAnswerChange(index, answerIndex, 'isCorrect', e.target.checked)}
-                                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  onChange={(e) => {
+                                    // 设置当前选项为正确答案，其他选项为错误答案
+                                    const updatedQuestions = [...game.questions];
+                                    updatedQuestions[index].answers = updatedQuestions[index].answers.map((a, i) => ({
+                                      ...a,
+                                      isCorrect: i === answerIndex
+                                    }));
+                                    setGame({ ...game, questions: updatedQuestions });
+                                  }}
+                                  className="w-4 h-4 border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span className="text-sm font-medium text-gray-700">Correct Answer</span>
                               </label>
-                              <Button
-                                onClick={() => handleDeleteAnswer(index, answerIndex)}
-                                variant="danger"
-                                className="text-sm"
-                              >
-                                Delete
-                              </Button>
+                              {question.type === 'multiple-choice' && (
+                                <Button
+                                  onClick={() => handleDeleteAnswer(index, answerIndex)}
+                                  variant="danger"
+                                  className="text-sm"
+                                >
+                                  Delete
+                                </Button>
+                              )}
                             </div>
                           </div>
                         ))}
-                        {question.answers.length === 0 && (
-                          <div className="text-center text-gray-500 py-4">
-                            No answers yet. Click "Add Answer" to add one.
-                          </div>
-                        )}
                       </div>
                     </div>
-
                   </div>
                 </div>
               ))}
