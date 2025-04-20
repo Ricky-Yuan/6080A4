@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { startGame, endGame, getGameStatus } from '../../api/game';
+import { startGame, endGame, getGameStatus, getGames } from '../../api/game';
 import Button from '../common/Button';
 import PlayerList from './PlayerList';
 import QuestionDisplay from './QuestionDisplay';
@@ -13,7 +13,7 @@ const GameSession = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 获取会话状态
+
   const fetchSessionStatus = async () => {
     if (!sessionId) return;
     try {
@@ -27,10 +27,31 @@ const GameSession = () => {
   const handleStartGame = async () => {
     try {
       setIsLoading(true);
+      console.log('GameSession - Starting game with ID:', gameId);
+      
+      try {
+        // Try to end any existing active session first
+        await endGame(gameId);
+        console.log('Successfully ended any existing session');
+      } catch (error) {
+        // Ignore error as there might not be an active session
+        console.log('No active session to end or failed to end session:', error);
+      }
+
+      // Wait a bit to ensure the session is fully ended
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Start a new session
       const response = await startGame(gameId);
-      setSessionId(response.sessionId);
-      await fetchSessionStatus();
+      console.log('GameSession - Start game response:', response);
+      if (response.data && response.data.sessionId) {
+        setSessionId(response.data.sessionId);
+        await fetchSessionStatus();
+      } else {
+        throw new Error('Failed to get session ID');
+      }
     } catch (error) {
+      console.error('GameSession - Error starting game:', error);
       setError('Failed to start game');
     } finally {
       setIsLoading(false);
