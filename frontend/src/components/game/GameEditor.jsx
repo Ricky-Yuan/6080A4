@@ -77,6 +77,15 @@ const GameEditor = () => {
     setGame({ ...game, questions: updatedQuestions });
   };
 
+  const handleQuestionChange = (index, field, value) => {
+    const updatedQuestions = [...game.questions];
+    updatedQuestions[index] = {
+      ...updatedQuestions[index],
+      [field]: value
+    };
+    setGame({ ...game, questions: updatedQuestions });
+  };
+
   if (isLoading) {
     return <div className="text-center py-4">Loading...</div>;
   }
@@ -117,35 +126,6 @@ const GameEditor = () => {
                   placeholder="Enter thumbnail URL"
                 />
               </div>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Questions</h2>
-              <Button
-                onClick={handleAddQuestion}
-                variant="primary"
-              >
-                Add Question
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              {game?.questions?.map((question, index) => (
-                <div key={question.id} className="border rounded-lg p-4 bg-gray-50">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold">Question {index + 1}</h3>
-                    <Button
-                      onClick={() => handleDeleteQuestion(index)}
-                      variant="danger"
-                      className="text-sm"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
