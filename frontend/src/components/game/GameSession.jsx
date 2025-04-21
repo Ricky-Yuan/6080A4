@@ -1,47 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { startGame, endGame, getGameStatus } from '../../api/game';
 import Button from '../common/Button';
 import PlayerList from './PlayerList';
 import QuestionDisplay from './QuestionDisplay';
-import JoinGame from './JoinGame';
 import CopyLink from '../common/CopyLink';
 
 const GameSession = () => {
   const { gameId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [sessionId, setSessionId] = useState(null);
+  
+  // Get session ID from URL query parameters
+  const [sessionId, setSessionId] = useState(searchParams.get('session'));
   const [sessionStatus, setSessionStatus] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCopyLink, setShowCopyLink] = useState(false);
 
-  // 初始化游戏会话
-  useEffect(() => {
-    const initializeSession = async () => {
-      try {
-        setIsLoading(true);
-        // 尝试获取游戏状态
-        const response = await startGame(gameId);
-        const newSessionId = response?.data?.sessionId;
-        
-        if (newSessionId) {
-          setSessionId(newSessionId);
-          const status = await getGameStatus(newSessionId);
-          setSessionStatus(status);
-        }
-      } catch (error) {
-        console.error('Failed to initialize game session:', error);
-        setError('Failed to initialize game session');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeSession();
-  }, [gameId]);
-
-  // 定期更新游戏状态
+  // Fetch game status periodically
   useEffect(() => {
     if (!sessionId) return;
 
@@ -49,11 +26,17 @@ const GameSession = () => {
       try {
         const status = await getGameStatus(sessionId);
         setSessionStatus(status);
+        setError('');
       } catch (error) {
         console.error('Failed to fetch game status:', error);
+        setError('Failed to fetch game status');
       }
     };
 
+    // Initial fetch
+    fetchStatus();
+
+    // Set up polling interval
     const interval = setInterval(fetchStatus, 5000);
     return () => clearInterval(interval);
   }, [sessionId]);

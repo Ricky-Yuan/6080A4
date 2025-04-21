@@ -102,12 +102,30 @@ const Dashboard = () => {
       setIsLoading(true);
       setError('');
       
-      // 先启动游戏
+      // First, end any existing active session
+      try {
+        await endGame(gameId);
+        console.log('Successfully ended any existing session');
+      } catch (error) {
+        // Ignore error as there might not be an active session
+        console.log('No active session to end or failed to end session:', error);
+      }
+
+      // Wait for the session to fully end
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Start a new game session
       const response = await startGame(gameId);
       console.log('Game started successfully:', response);
       
-      // 然后再导航到游戏页面
-      navigate(`/game/${gameId}`);
+      // Get the session ID from response
+      const sessionId = response?.data?.sessionId;
+      if (!sessionId) {
+        throw new Error('Failed to get session ID');
+      }
+
+      // Navigate to game page with session ID
+      navigate(`/game/${gameId}?session=${sessionId}`);
     } catch (error) {
       console.error('Failed to start game:', error);
       setError('Failed to start game');
