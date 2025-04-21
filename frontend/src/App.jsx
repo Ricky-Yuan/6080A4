@@ -21,6 +21,7 @@ const App = () => {
             </PrivateRoute>
           }
         />
+        <Route path="/game/join/:gameId/:sessionId" element={<JoinGamePage />} />
         <Route
           path="/game/:gameId"
           element={
@@ -29,7 +30,6 @@ const App = () => {
             </PrivateRoute>
           }
         />
-        <Route path="/game/join/:gameId/:sessionId" element={<JoinGamePage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

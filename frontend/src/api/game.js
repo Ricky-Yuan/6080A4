@@ -110,15 +110,22 @@ export const endGame = async (gameId) => {
   return response;
 };
 
-// Get game status
+// Get game status (admin only)
 export const getGameStatus = async (sessionId) => {
   const response = await apiClient.get(`/admin/session/${sessionId}/status`);
-  return response.results;
+  return response.data;
 };
 
+// Get game status (for players)
+export const getPlayerGameStatus = async (sessionId) => {
+  const response = await apiClient.get(`/play/session/${sessionId}/status`);
+  return response.data.results;
+};
+
+// Join game session
 export const joinGame = async (sessionId, playerName) => {
-  const response = await axios.post(`/play/join/${sessionId}`, {
+  const response = await apiClient.post(`/play/join/${sessionId}`, {
     name: playerName
   });
-  return response.data;
+  return response;
 }; 
