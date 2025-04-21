@@ -16,6 +16,9 @@ const Dashboard = () => {
   const [newGameName, setNewGameName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showGameLinkModal, setShowGameLinkModal] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState(null);
+  const [currentGameId, setCurrentGameId] = useState(null);
 
   // Load games when component mounts
   useEffect(() => {
@@ -102,36 +105,39 @@ const Dashboard = () => {
       setIsLoading(true);
       setError('');
       
-      // First, end any existing active session
-      try {
-        await endGame(gameId);
-        console.log('Successfully ended any existing session');
-      } catch (error) {
-        // Ignore error as there might not be an active session
-        console.log('No active session to end or failed to end session:', error);
-      }
-
-      // Wait for the session to fully end
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Try to end any existing session, ignore if no active session exists
+      await endGame(gameId).catch(error => {
+        // Ignore the error if there's no active session
+        console.log('No active session to end:', error);
+      });
+      
+      // Wait for a short period to ensure clean state
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Start a new game session
       const response = await startGame(gameId);
       console.log('Game started successfully:', response);
       
-      // Get the session ID from response
-      const sessionId = response?.data?.sessionId;
+      // Get session ID from response
+      const sessionId = response.sessionId;
       if (!sessionId) {
         throw new Error('Failed to get session ID');
       }
 
-      // Navigate to game page with session ID
+      // Navigate admin to game management page
       navigate(`/game/${gameId}?session=${sessionId}`);
     } catch (error) {
       console.error('Failed to start game:', error);
-      setError('Failed to start game');
+      setError(error.response?.data?.error || 'Failed to start game');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getGameJoinLink = (gameId, sessionId) => {
+    if (!gameId || !sessionId) return '';
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/play/${gameId}/${sessionId}`;
   };
 
   return (
@@ -193,6 +199,37 @@ const Dashboard = () => {
           onChange={(e) => setNewGameName(e.target.value)}
           required
         />
+      </Modal>
+
+      <Modal
+        isOpen={showGameLinkModal}
+        onClose={() => {
+          setShowGameLinkModal(false);
+          setCurrentSessionId(null);
+          setCurrentGameId(null);
+        }}
+        title="Game Started Successfully"
+      >
+        <div className="space-y-4">
+          <p>Share this link with players to join the game:</p>
+          <div className="flex items-center space-x-2">
+            <Input
+              type="text"
+              defaultValue={currentSessionId && currentGameId ? getGameJoinLink(currentGameId, currentSessionId) : ''}
+              readOnly
+              className="flex-1"
+            />
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(getGameJoinLink(currentGameId, currentSessionId));
+              }}
+              variant="secondary"
+              className="whitespace-nowrap"
+            >
+              Copy Link
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

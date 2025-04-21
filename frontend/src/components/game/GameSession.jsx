@@ -16,7 +16,13 @@ const GameSession = () => {
   const [sessionStatus, setSessionStatus] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showCopyLink, setShowCopyLink] = useState(false);
+  const [showCopyLink, setShowCopyLink] = useState(true);
+
+  // Get the join link for players
+  const getJoinGameLink = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/play/${gameId}/${sessionId}`;
+  };
 
   // Fetch game status periodically
   useEffect(() => {
@@ -54,11 +60,6 @@ const GameSession = () => {
     }
   };
 
-  const getJoinGameLink = () => {
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/game/join/${gameId}/${sessionId}`;
-  };
-
   if (isLoading) {
     return <div className="text-center py-4">Loading...</div>;
   }
@@ -76,7 +77,7 @@ const GameSession = () => {
                 variant="link"
                 className="ml-2"
               >
-                copy link
+                Copy Join Link
               </Button>
             </div>
           )}
