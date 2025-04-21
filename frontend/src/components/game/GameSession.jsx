@@ -5,6 +5,7 @@ import Button from '../common/Button';
 import PlayerList from './PlayerList';
 import QuestionDisplay from './QuestionDisplay';
 import JoinGame from './JoinGame';
+import CopyLink from '../common/CopyLink';
 
 const GameSession = () => {
   const { gameId } = useParams();
@@ -14,6 +15,7 @@ const GameSession = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [playerId, setPlayerId] = useState(null);
+  const [showCopyLink, setShowCopyLink] = useState(false);
 
   const fetchSessionStatus = async () => {
     if (!sessionId) {
@@ -77,6 +79,8 @@ const GameSession = () => {
       }
 
       setSessionId(newSessionId);
+      setShowCopyLink(true);  // Show the copy link modal
+
       // Use the sessionId for status updates
       try {
         const initialStatus = await getGameStatus(newSessionId);
@@ -108,6 +112,11 @@ const GameSession = () => {
     }
   };
 
+  const getJoinGameLink = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/play/join/${sessionId}`;
+  };
+
   if (isLoading) {
     return <div className="text-center py-4">Loading...</div>;
   }
@@ -120,6 +129,13 @@ const GameSession = () => {
           {sessionId && (
             <div className="text-sm text-gray-600">
               Session ID: {sessionId}
+              <Button
+                onClick={() => setShowCopyLink(true)}
+                variant="link"
+                className="ml-2"
+              >
+                copy link
+              </Button>
             </div>
           )}
         </div>
@@ -164,6 +180,13 @@ const GameSession = () => {
               End Game
             </Button>
           </div>
+        )}
+
+        {showCopyLink && (
+          <CopyLink
+            link={getJoinGameLink()}
+            onClose={() => setShowCopyLink(false)}
+          />
         )}
       </div>
     </div>
