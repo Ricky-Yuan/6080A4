@@ -25,9 +25,7 @@ export const AuthProvider = ({ children }) => {
       const { token } = response;
       const user = { email, token: `Bearer ${token}` };
       
-      // 先设置到 localStorage
       localStorage.setItem('currentUser', JSON.stringify(user));
-      // 再更新 state
       setCurrentUser(user);
       
       return user;

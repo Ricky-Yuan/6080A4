@@ -54,10 +54,8 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/game/play/:gameId/:sessionId/:playerId"
-          element={<GameSession />}
-        />
+        <Route path="/play/:gameId/:sessionId" element={<JoinGamePage />} />
+        <Route path="/play/:gameId/:sessionId/:playerId" element={<GameSession />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

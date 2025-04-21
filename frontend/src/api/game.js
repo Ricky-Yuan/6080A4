@@ -120,7 +120,7 @@ export const getGameStatus = async (sessionId) => {
 // Get game status (for players)
 export const getPlayerGameStatus = async (sessionId) => {
   const response = await apiClient.get(`/play/session/${sessionId}/status`);
-  return response.data.results;
+  return response.data;  // Return the entire response data, not just results
 };
 
 // Join game session

@@ -16,7 +16,6 @@ const JoinGamePage = () => {
       try {
         const status = await getPlayerGameStatus(sessionId);
         setGameStatus(status);
-        // Game has started if there's an active question
         if (status?.started) {
           setError('The game has already started, please join another game');
         }
