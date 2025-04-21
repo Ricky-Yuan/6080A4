@@ -114,7 +114,7 @@ const GameSession = () => {
 
   const getJoinGameLink = () => {
     const baseUrl = window.location.origin;
-    return `${baseUrl}/play/join/${sessionId}`;
+    return `${baseUrl}/game/join/${gameId}/${sessionId}`;
   };
 
   if (isLoading) {
