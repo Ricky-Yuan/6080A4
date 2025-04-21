@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiLogin(email, password);
       const { token } = response;
-      const user = { email, token };
+      const user = { email, token: `Bearer ${token}` };
       setCurrentUser(user);
       return user;
     } catch (error) {
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiRegister(email, password, name);
       const { token } = response;
-      const user = { email, name, token };
+      const user = { email, name, token: `Bearer ${token}` };
       setCurrentUser(user);
       return user;
     } catch (error) {
