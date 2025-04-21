@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { joinGame, getGameStatus } from '../../api/game';
+import { joinGame, getPlayerGameStatus } from '../../api/game';
 import Button from '../common/Button';
 
 const JoinGamePage = () => {
@@ -14,9 +14,10 @@ const JoinGamePage = () => {
   useEffect(() => {
     const fetchGameStatus = async () => {
       try {
-        const status = await getGameStatus(sessionId);
+        const status = await getPlayerGameStatus(sessionId);
         setGameStatus(status);
-        if (status?.position !== -1) {
+        // Game has started if there's an active question
+        if (status?.started) {
           setError('The game has already started, please join another game');
         }
       } catch (error) {
@@ -38,18 +39,19 @@ const JoinGamePage = () => {
       setIsLoading(true);
       setError('');
       const response = await joinGame(sessionId, playerName.trim());
-      if (response.playerId) {
-        navigate(`/game/play/${gameId}/${sessionId}/${response.playerId}`);
+      if (response.data?.playerId) {
+        navigate(`/play/${gameId}/${sessionId}/${response.data.playerId}`);
       }
     } catch (error) {
       console.error('Join game error:', error);
-      setError(error.response?.data?.message || 'join game failed');
+      setError(error.response?.data?.error || 'Failed to join game');
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (gameStatus?.position !== -1) {
+  // Only show error message if game has started
+  if (gameStatus?.started) {
     return (
       <div className="max-w-md mx-auto mt-8 p-4">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -66,7 +68,7 @@ const JoinGamePage = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="playerName" className="block text-sm font-medium text-gray-700">
-                Player Name
+              Player Name
             </label>
             <input
               type="text"
@@ -89,7 +91,7 @@ const JoinGamePage = () => {
             className="w-full"
             disabled={isLoading}
           >
-            {isLoading ? 'joining...' : 'join game'}
+            {isLoading ? 'Joining...' : 'Join Game'}
           </Button>
         </form>
       </div>
