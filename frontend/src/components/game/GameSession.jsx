@@ -1,55 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { startGame, endGame, getGameStatus } from '../../api/game';
+import { startGame, endGame, getPlayerGameStatus } from '../../api/game';
 import Button from '../common/Button';
 import PlayerList from './PlayerList';
 import QuestionDisplay from './QuestionDisplay';
 import JoinGame from './JoinGame';
 import CopyLink from '../common/CopyLink';
+import { Box, Typography, CircularProgress, Container } from '@mui/material';
 
 const GameSession = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState(null);
-  const [sessionStatus, setSessionStatus] = useState(null);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [playerId, setPlayerId] = useState(null);
   const [showCopyLink, setShowCopyLink] = useState(false);
 
-  const fetchSessionStatus = async () => {
-    if (!sessionId) {
-      console.log('GameSession - No sessionId available, skipping status fetch');
-      return;
-    }
+  const fetchGameStatus = async () => {
     try {
-      console.log('GameSession - Fetching status for session:', sessionId);
-      const status = await getGameStatus(sessionId);
-      console.log('GameSession - Received status:', status);
-      setSessionStatus(status);
-    } catch (error) {
-      console.error('GameSession - Failed to fetch session status:', error);
-      setError('Failed to fetch session status');
+      const gameStatus = await getPlayerGameStatus(sessionId);
+      setStatus(gameStatus);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Error fetching game status');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (sessionId) {
-      fetchSessionStatus();
-      const interval = setInterval(fetchSessionStatus, 5000);
-      return () => clearInterval(interval);
-    }
+    fetchGameStatus();
+    const interval = setInterval(fetchGameStatus, 5000);
+    return () => clearInterval(interval);
   }, [sessionId]);
 
   const handlePlayerJoined = (newPlayerId) => {
     setPlayerId(newPlayerId);
-    // 刷新会话状态以显示新玩家
-    fetchSessionStatus();
+    // Refresh session status to show new player
+    fetchGameStatus();
   };
 
   const handleStartGame = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       setError('');
       console.log('GameSession - Starting game with ID:', gameId);
       
@@ -83,9 +78,9 @@ const GameSession = () => {
 
       // Use the sessionId for status updates
       try {
-        const initialStatus = await getGameStatus(newSessionId);
+        const initialStatus = await getPlayerGameStatus(newSessionId);
         console.log('GameSession - Initial session status:', initialStatus);
-        setSessionStatus(initialStatus);
+        setStatus(initialStatus);
       } catch (error) {
         console.error('GameSession - Failed to fetch initial session status:', error);
         setError('Failed to fetch initial session status');
@@ -94,21 +89,21 @@ const GameSession = () => {
       console.error('GameSession - Error starting game:', error);
       setError(`Failed to start game: ${error.message}`);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const handleEndGame = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       await endGame(gameId);
       setSessionId(null);
-      setSessionStatus(null);
+      setStatus(null);
       navigate('/dashboard');
     } catch (error) {
       setError('Failed to end game');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -117,79 +112,48 @@ const GameSession = () => {
     return `${baseUrl}/game/join/${gameId}/${sessionId}`;
   };
 
-  if (isLoading) {
-    return <div className="text-center py-4">Loading...</div>;
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Typography color="error" variant="h6">
+          {error}
+        </Typography>
+      </Container>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Game Session</h2>
-          {sessionId && (
-            <div className="text-sm text-gray-600">
-              Session ID: {sessionId}
-              <Button
-                onClick={() => setShowCopyLink(true)}
-                variant="link"
-                className="ml-2"
-              >
-                copy link
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {error && (
-          <div className="mb-4 text-red-500">{error}</div>
+    <Container>
+      <Box py={4}>
+        <Typography variant="h4" gutterBottom>
+          Game Session
+        </Typography>
+        <Typography variant="body1">
+          Session ID: {sessionId}
+        </Typography>
+        <Typography variant="body1">
+          Status: {status?.state || 'Unknown'}
+        </Typography>
+        {status?.questions && (
+          <Typography variant="body1">
+            Questions: {status.questions.length}
+          </Typography>
         )}
-
-        {!sessionId ? (
-          <Button onClick={handleStartGame} variant="primary" className="w-full">
-            Start Game
-          </Button>
-        ) : (
-          <div className="space-y-6">
-            {!playerId && sessionStatus?.position === -1 ? (
-              <JoinGame 
-                sessionId={sessionId} 
-                onPlayerJoined={handlePlayerJoined} 
-              />
-            ) : (
-              <>
-                <PlayerList players={sessionStatus?.players || []} />
-                
-                {sessionStatus && (
-                  <QuestionDisplay
-                    question={sessionStatus.questions?.[sessionStatus.position]}
-                    position={sessionStatus.position}
-                    totalQuestions={sessionStatus.questions?.length || 0}
-                  />
-                )}
-              </>
-            )}
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Debug Info</h3>
-              <pre className="text-sm">
-                {JSON.stringify(sessionStatus, null, 2)}
-              </pre>
-            </div>
-
-            <Button onClick={handleEndGame} variant="danger" className="w-full">
-              End Game
-            </Button>
-          </div>
+        {status?.position !== undefined && (
+          <Typography variant="body1">
+            Current Question: {status.position + 1}
+          </Typography>
         )}
-
-        {showCopyLink && (
-          <CopyLink
-            link={getJoinGameLink()}
-            onClose={() => setShowCopyLink(false)}
-          />
-        )}
-      </div>
-    </div>
+      </Box>
+    </Container>
   );
 };
 
