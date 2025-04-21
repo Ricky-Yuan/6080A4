@@ -19,16 +19,38 @@ const Dashboard = () => {
 
   // Load games when component mounts
   useEffect(() => {
-    loadGames();
-  }, []);
+    if (currentUser) {
+      loadGames();
+    }
+  }, [currentUser]);
 
   const loadGames = async () => {
     try {
       setIsLoading(true);
-      const gamesData = await getGames();
-      setGames(gamesData);
+      setError('');
+
+      let retryCount = 0;
+      const maxRetries = 2;
+      
+      while (retryCount <= maxRetries) {
+        try {
+          const gamesData = await getGames();
+          setGames(gamesData);
+          setError('');
+          break;
+        } catch (error) {
+          console.log(`Attempt ${retryCount + 1} failed:`, error);
+          if (retryCount === maxRetries) {
+            throw error;
+          }
+          retryCount++;
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
     } catch (error) {
+      console.error('Failed to load games:', error);
       setError('Failed to load games');
+      setGames([]); 
     } finally {
       setIsLoading(false);
     }
@@ -80,18 +102,14 @@ const Dashboard = () => {
       setIsLoading(true);
       setError('');
       
-      // 先尝试结束任何可能存在的活跃会话
-      try {
-        await endGame(gameId);
-        console.log('Successfully ended any existing session');
-      } catch (error) {
-        // 忽略错误，因为可能没有活跃会话
-        console.log('No active session to end or failed to end session:', error);
-      }
-
-      // 导航到游戏会话页面
+      // 先启动游戏
+      const response = await startGame(gameId);
+      console.log('Game started successfully:', response);
+      
+      // 然后再导航到游戏页面
       navigate(`/game/${gameId}`);
     } catch (error) {
+      console.error('Failed to start game:', error);
       setError('Failed to start game');
     } finally {
       setIsLoading(false);
