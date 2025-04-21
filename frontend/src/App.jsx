@@ -1,33 +1,48 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
+import LoginForm from './components/auth/LoginForm';
+import RegisterForm from './components/auth/RegisterForm';
 import Dashboard from './components/dashboard/Dashboard';
 import GameSession from './components/game/GameSession';
 import JoinGamePage from './components/game/JoinGamePage';
-import { PrivateRoute } from './components/common/PrivateRoute';
+import { useAuth } from './contexts/AuthContext';
 
 const App = () => {
+  const { currentUser } = useAuth();
+
+  const ProtectedRoute = ({ children }) => {
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
+    return children;
+  };
+
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route 
+          path="/login" 
+          element={currentUser ? <Navigate to="/dashboard" /> : <LoginForm />} 
+        />
+        <Route 
+          path="/register" 
+          element={currentUser ? <Navigate to="/dashboard" /> : <RegisterForm />} 
+        />
         <Route
           path="/dashboard"
           element={
-            <PrivateRoute>
+            <ProtectedRoute>
               <Dashboard />
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
         <Route path="/game/join/:gameId/:sessionId" element={<JoinGamePage />} />
         <Route
           path="/game/:gameId"
           element={
-            <PrivateRoute>
+            <ProtectedRoute>
               <GameSession />
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
