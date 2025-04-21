@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { getGames, createGame, deleteGame, startGame } from '../../api/game';
+import { getGames, createGame, deleteGame, startGame, endGame } from '../../api/game';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
@@ -78,8 +78,19 @@ const Dashboard = () => {
   const handleStartGame = async (gameId) => {
     try {
       setIsLoading(true);
-      // Navigate to game session page with correct path
-      navigate(`/game/${gameId}/play`);
+      setError('');
+      
+      // 先尝试结束任何可能存在的活跃会话
+      try {
+        await endGame(gameId);
+        console.log('Successfully ended any existing session');
+      } catch (error) {
+        // 忽略错误，因为可能没有活跃会话
+        console.log('No active session to end or failed to end session:', error);
+      }
+
+      // 导航到游戏会话页面
+      navigate(`/game/${gameId}`);
     } catch (error) {
       setError('Failed to start game');
     } finally {

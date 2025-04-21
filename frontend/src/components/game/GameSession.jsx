@@ -43,7 +43,6 @@ const GameSession = () => {
 
   const handlePlayerJoined = (newPlayerId) => {
     setPlayerId(newPlayerId);
-    // 刷新会话状态以显示新玩家
     fetchSessionStatus();
   };
 
@@ -51,48 +50,34 @@ const GameSession = () => {
     try {
       setIsLoading(true);
       setError('');
-      console.log('GameSession - Starting game with ID:', gameId);
       
+      // 先尝试结束任何可能存在的活跃会话
       try {
-        // Try to end any existing active session first
         await endGame(gameId);
         console.log('Successfully ended any existing session');
       } catch (error) {
-        // Ignore error as there might not be an active session
+        // 忽略错误，因为可能没有活跃会话
         console.log('No active session to end or failed to end session:', error);
       }
 
-      // Wait a bit to ensure the session is fully ended
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Start a new session
+      // 开始新的游戏会话
       const response = await startGame(gameId);
-      console.log('GameSession - Start game response:', response);
+      console.log('Game started:', response);
       
-      // Extract sessionId from response based on backend API structure
-      const newSessionId = response?.data?.sessionId;
-      console.log('GameSession - Extracted sessionId:', newSessionId);
-
-      if (!newSessionId) {
-        console.error('GameSession - Invalid response structure:', response);
-        throw new Error('Failed to get session ID from response');
+      // 获取会话ID
+      const sessionId = response?.data?.sessionId;
+      if (!sessionId) {
+        throw new Error('No session ID received');
       }
 
-      setSessionId(newSessionId);
-      setShowCopyLink(true);  // Show the copy link modal
-
-      // Use the sessionId for status updates
-      try {
-        const initialStatus = await getGameStatus(newSessionId);
-        console.log('GameSession - Initial session status:', initialStatus);
-        setSessionStatus(initialStatus);
-      } catch (error) {
-        console.error('GameSession - Failed to fetch initial session status:', error);
-        setError('Failed to fetch initial session status');
-      }
-    } catch (error) {
-      console.error('GameSession - Error starting game:', error);
-      setError(`Failed to start game: ${error.message}`);
+      // 设置会话ID并获取初始状态
+      setSessionId(sessionId);
+      const initialStatus = await getGameStatus(sessionId);
+      setSessionStatus(initialStatus);
+      setError(null);
+    } catch (err) {
+      console.error('Error starting game:', err);
+      setError(err.message || '启动游戏时出错');
     } finally {
       setIsLoading(false);
     }
