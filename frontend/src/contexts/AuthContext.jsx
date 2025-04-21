@@ -24,7 +24,12 @@ export const AuthProvider = ({ children }) => {
       const response = await apiLogin(email, password);
       const { token } = response;
       const user = { email, token: `Bearer ${token}` };
+      
+      // 先设置到 localStorage
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      // 再更新 state
       setCurrentUser(user);
+      
       return user;
     } catch (error) {
       console.error('Login error:', error);
@@ -55,7 +60,12 @@ export const AuthProvider = ({ children }) => {
       const response = await apiRegister(email, password, name);
       const { token } = response;
       const user = { email, name, token: `Bearer ${token}` };
+      
+      // 先设置到 localStorage
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      // 再更新 state
       setCurrentUser(user);
+      
       return user;
     } catch (error) {
       console.error('Registration error:', error);
