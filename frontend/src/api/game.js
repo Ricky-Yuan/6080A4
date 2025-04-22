@@ -114,14 +114,15 @@ export const endGame = async (gameId) => {
 // Get game status (admin only)
 export const getGameStatus = async (sessionId) => {
   const response = await apiClient.get(`/admin/session/${sessionId}/status`);
-  return response.data;
+  console.log('Admin game status response:', response);
+  return response;  // apiClient already returns the parsed response
 };
 
 // Get game status (for players)
 export const getPlayerGameStatus = async (sessionId) => {
   const response = await apiClient.get(`/play/session/${sessionId}/status`);
   console.log('Player status response:', response);
-  return response.results;  // Return the results portion of the response
+  return response;  // apiClient already returns the parsed response
 };
 
 // Join game session

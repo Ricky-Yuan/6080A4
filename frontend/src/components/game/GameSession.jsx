@@ -30,16 +30,20 @@ const GameSession = () => {
 
     const fetchStatus = async () => {
       try {
-        const status = await getGameStatus(sessionId);
-        console.log('Game session status:', status);
+        const response = await getGameStatus(sessionId);
+        console.log('Game session status:', response);
         
+        if (!response || !response.results) {
+          throw new Error('Invalid response format');
+        }
+
         // Ensure we have a valid status object with players array
         const updatedStatus = {
-          ...status.results,  // Extract the results object from the response
-          players: status.results?.players || [],
-          started: status.results?.started || false,
-          position: status.results?.position || -1,
-          questions: status.results?.questions || []
+          ...response.results,
+          players: response.results.players || [],
+          started: response.results.started || false,
+          position: response.results.position || -1,
+          questions: response.results.questions || []
         };
         
         setSessionStatus(updatedStatus);
