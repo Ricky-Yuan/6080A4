@@ -98,20 +98,46 @@ export const updateGame = async (gameId, data) => {
 // Start game session
 export const startGame = async (gameId) => {
   console.log('Starting game with ID:', gameId);
+  
+  // First try to end any existing session
+  try {
+    await endGame(gameId);
+    // Wait for session to properly end
+    await new Promise(resolve => setTimeout(resolve, 500));
+  } catch (error) {
+    console.log('Error ending current session (may not exist):', error);
+  }
+
+  // Start new game
   const response = await apiClient.post(`/admin/game/${gameId}/mutate`, { 
     mutationType: 'start' 
   });
+  
   console.log('Start game response:', response);
-  return response.data;  // Return the raw response data from backend
+  
+  if (!response?.data?.status || response.data.status !== 'started' || !response.data.sessionId) {
+    throw new Error('Invalid server response format');
+  }
+  
+  return {
+    data: {
+      sessionId: response.data.sessionId
+    }
+  };
 };
 
 // End game session
 export const endGame = async (gameId) => {
-  const response = await apiClient.post(`/admin/game/${gameId}/mutate`, { 
-    mutationType: 'end' 
-  });
-  console.log('End game response:', response);
-  return response;
+  try {
+    const response = await apiClient.post(`/admin/game/${gameId}/mutate`, { 
+      mutationType: 'end' 
+    });
+    console.log('End game response:', response);
+    return response;
+  } catch (error) {
+    console.error('Error ending game:', error);
+    throw error;
+  }
 };
 
 // Get game status (admin only)

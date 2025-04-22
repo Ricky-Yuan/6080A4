@@ -64,48 +64,43 @@ const GameSession = () => {
       setIsLoading(true);
       setError('');
 
-      // 先尝试结束任何现有的游戏会话
-      try {
-        await endGame(gameId);
-        // 等待一段时间确保会话完全结束
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error) {
-        console.log('No active session to end or error ending session:', error);
-      }
-
-      // 开始新游戏
+      // Start new game
+      let maxRetries = 3;
       let retryCount = 0;
-      let response;
-      
-      while (retryCount < 3) {
+      let response = null;
+      let lastError = null;
+
+      while (retryCount < maxRetries) {
         try {
           response = await startGame(gameId);
           if (response?.data?.sessionId) {
             break;
           }
+          await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
-          console.log(`Start game attempt ${retryCount + 1} failed:`, error);
+          lastError = error;
+          console.log(`Start game attempt ${retryCount + 1}/${maxRetries} failed:`, error);
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
         retryCount++;
       }
 
       if (!response?.data?.sessionId) {
-        throw new Error('Failed to start game: No session ID received after retries');
+        throw new Error(lastError?.message || 'Failed to start game after multiple attempts');
       }
 
-      // 更新会话ID和状态
+      // Update session ID and state
       const newSessionId = response.data.sessionId;
       setSessionId(newSessionId);
       
-      // 更新URL但不触发重定向
+      // Update URL without triggering navigation
       const newUrl = `/game/${gameId}?session=${newSessionId}`;
       window.history.replaceState(null, '', newUrl);
       
       setShowCopyLink(true);
     } catch (error) {
       console.error('Failed to start game:', error);
-      setError('Failed to start game. Please try again.');
+      setError(error.message || 'Failed to start game. Please try again.');
     } finally {
       setIsLoading(false);
     }
