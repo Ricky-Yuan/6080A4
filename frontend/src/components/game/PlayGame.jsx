@@ -17,30 +17,36 @@ const PlayGame = () => {
   useEffect(() => {
     const fetchGameStatus = async () => {
       try {
-        const status = await getPlayerGameStatus(sessionId);
-        console.log('Player game status:', status, 'Player ID:', playerId);
+        const response = await getPlayerGameStatus(sessionId);
+        console.log('Player game status:', response, 'Player ID:', playerId);
         
-        if (status) {
-          // Format players data for ScoreBoard
-          const formattedPlayers = status.players.map((playerName, index) => ({
-            id: `player-${index}`,
-            name: playerName,
-            score: 0
-          }));
+        if (!response || !response.results) {
+          throw new Error('Invalid response format');
+        }
 
-          setGameStatus({
-            ...status,
-            players: formattedPlayers
+        const status = response.results;
+        
+        // Format players data for ScoreBoard if players array exists
+        const formattedPlayers = Array.isArray(status.players) 
+          ? status.players.map((playerName, index) => ({
+              id: `player-${index}`,
+              name: playerName,
+              score: 0
+            }))
+          : [];
+
+        setGameStatus({
+          ...status,
+          players: formattedPlayers
+        });
+        
+        if (status.question) {
+          setCurrentQuestion({
+            number: status.position + 1,
+            text: status.question.text,
+            options: status.question.options || []
           });
-          
-          if (status.question) {
-            setCurrentQuestion({
-              number: status.position + 1,
-              text: status.question.text,
-              options: status.question.options || []
-            });
-            setTimeLeft(status.timeLeft);
-          }
+          setTimeLeft(status.timeLeft);
         }
         
         setError('');
