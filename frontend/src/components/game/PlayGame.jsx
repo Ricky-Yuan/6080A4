@@ -21,7 +21,17 @@ const PlayGame = () => {
         console.log('Player game status:', status, 'Player ID:', playerId);
         
         if (status) {
-          setGameStatus(status);
+          // Format players data for ScoreBoard
+          const formattedPlayers = status.players.map((playerName, index) => ({
+            id: `player-${index}`,
+            name: playerName,
+            score: 0
+          }));
+
+          setGameStatus({
+            ...status,
+            players: formattedPlayers
+          });
           
           if (status.question) {
             setCurrentQuestion({
