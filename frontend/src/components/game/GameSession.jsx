@@ -31,6 +31,7 @@ const GameSession = () => {
     const fetchStatus = async () => {
       try {
         const status = await getGameStatus(sessionId);
+        console.log('Game status:', status);
         setSessionStatus(status);
         setError('');
       } catch (error) {
@@ -42,10 +43,31 @@ const GameSession = () => {
     // Initial fetch
     fetchStatus();
 
-    // Set up polling interval
-    const interval = setInterval(fetchStatus, 5000);
+    // Set up polling interval (every 2 seconds instead of 5)
+    const interval = setInterval(fetchStatus, 2000);
     return () => clearInterval(interval);
   }, [sessionId]);
+
+  const handleStartGame = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      const response = await startGame(gameId);
+      console.log('Start game response:', response);
+      
+      if (!response || !response.sessionId) {
+        throw new Error('Failed to start game: No session ID received');
+      }
+      
+      setSessionId(response.sessionId);
+      setShowCopyLink(true);
+    } catch (error) {
+      console.error('Failed to start game:', error);
+      setError('Failed to start game. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleEndGame = async () => {
     try {
@@ -88,25 +110,42 @@ const GameSession = () => {
         )}
 
         <div className="space-y-6">
-          <PlayerList players={sessionStatus?.players || []} />
-          
-          {sessionStatus && sessionStatus.position >= 0 && (
-            <QuestionDisplay
-              question={sessionStatus.questions?.[sessionStatus.position]}
-              position={sessionStatus.position}
-              totalQuestions={sessionStatus.questions?.length || 0}
-            />
-          )}
-
-          <div className="mt-4">
-            <Button
-              onClick={handleEndGame}
-              variant="danger"
-              className="w-full"
-            >
-              End Game
-            </Button>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3">Players</h3>
+            {sessionStatus?.players && sessionStatus.players.length > 0 ? (
+              <PlayerList players={sessionStatus.players} />
+            ) : (
+              <p className="text-gray-500">No players have joined yet.</p>
+            )}
           </div>
+          
+          {!sessionStatus?.started ? (
+            <Button
+              onClick={handleStartGame}
+              variant="primary"
+              className="w-full"
+              disabled={!sessionStatus?.players?.length}
+            >
+              {sessionStatus?.players?.length ? 'Start Game' : 'Waiting for Players...'}
+            </Button>
+          ) : (
+            <>
+              {sessionStatus.position >= 0 && (
+                <QuestionDisplay
+                  question={sessionStatus.questions?.[sessionStatus.position]}
+                  position={sessionStatus.position}
+                  totalQuestions={sessionStatus.questions?.length || 0}
+                />
+              )}
+              <Button
+                onClick={handleEndGame}
+                variant="danger"
+                className="w-full"
+              >
+                End Game
+              </Button>
+            </>
+          )}
         </div>
 
         {showCopyLink && (

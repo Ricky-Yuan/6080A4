@@ -2,45 +2,31 @@ import React from 'react';
 
 const ScoreBoard = ({ players, currentPlayerId }) => {
   // Sort players by score in descending order
-  const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+  const sortedPlayers = [...players].sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  if (!players || players.length === 0) {
+    return (
+      <div className="text-gray-500 text-center">
+        No players yet
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h3 className="text-lg font-semibold mb-4">Leaderboard</h3>
-      <div className="space-y-2">
-        {sortedPlayers.map((player, index) => (
-          <div
-            key={player.id}
-            className={`flex items-center justify-between p-2 rounded ${
-              player.id === currentPlayerId ? 'bg-blue-50' : 'hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-center space-x-3">
-              <span className="w-6 text-center font-medium">
-                #{index + 1}
-              </span>
-              <span className={`font-medium ${
-                player.id === currentPlayerId ? 'text-blue-600' : ''
-              }`}>
-                {player.name}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">
-                Score:
-              </span>
-              <span className="font-medium">
-                {player.score}
-              </span>
-            </div>
+    <div className="space-y-2">
+      {sortedPlayers.map((player) => (
+        <div
+          key={player.id || player.playerId}
+          className={`p-2 rounded ${
+            player.id === currentPlayerId ? 'bg-blue-100' : 'bg-gray-50'
+          }`}
+        >
+          <div className="flex justify-between items-center">
+            <span className="font-medium">{player.name}</span>
+            <span className="text-gray-600">{player.score || 0}</span>
           </div>
-        ))}
-        {players.length === 0 && (
-          <div className="text-center text-gray-500 py-4">
-            No players yet
-          </div>
-        )}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
