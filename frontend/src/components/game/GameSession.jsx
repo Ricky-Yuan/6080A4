@@ -31,8 +31,18 @@ const GameSession = () => {
     const fetchStatus = async () => {
       try {
         const status = await getGameStatus(sessionId);
-        console.log('Game status:', status);
-        setSessionStatus(status);
+        console.log('Game session status:', status);
+        
+        // Ensure we have a valid status object with players array
+        const updatedStatus = {
+          ...status.results,  // Extract the results object from the response
+          players: status.results?.players || [],
+          started: status.results?.started || false,
+          position: status.results?.position || -1,
+          questions: status.results?.questions || []
+        };
+        
+        setSessionStatus(updatedStatus);
         setError('');
       } catch (error) {
         console.error('Failed to fetch game status:', error);
@@ -40,10 +50,7 @@ const GameSession = () => {
       }
     };
 
-    // Initial fetch
     fetchStatus();
-
-    // Set up polling interval (every 2 seconds instead of 5)
     const interval = setInterval(fetchStatus, 2000);
     return () => clearInterval(interval);
   }, [sessionId]);
@@ -92,8 +99,8 @@ const GameSession = () => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Game Session</h2>
           {sessionId && (
-            <div className="text-sm text-gray-600">
-              Session ID: {sessionId}
+            <div className="text-sm text-gray-600 flex items-center">
+              <span>Session ID: {sessionId}</span>
               <Button
                 onClick={() => setShowCopyLink(true)}
                 variant="link"
@@ -111,7 +118,12 @@ const GameSession = () => {
 
         <div className="space-y-6">
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-3">Players</h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-semibold">Players</h3>
+              <span className="text-sm text-gray-500">
+                {sessionStatus?.players?.length || 0} players joined
+              </span>
+            </div>
             {sessionStatus?.players && sessionStatus.players.length > 0 ? (
               <PlayerList players={sessionStatus.players} />
             ) : (

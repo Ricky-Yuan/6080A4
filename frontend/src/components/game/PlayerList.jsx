@@ -1,29 +1,19 @@
 import React from 'react';
 
 const PlayerList = ({ players }) => {
-  if (!players || players.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-lg font-semibold mb-2">Players</h3>
-        <p className="text-gray-500">No players have joined yet.</p>
-      </div>
-    );
-  }
+  // Remove duplicate players
+  const uniquePlayers = [...new Set(players)];
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h3 className="text-lg font-semibold mb-2">Players</h3>
-      <div className="space-y-2">
-        {players.map((player, index) => (
-          <div
-            key={player.id}
-            className="flex justify-between items-center p-2 bg-gray-50 rounded"
-          >
-            <span className="font-medium">Player {index + 1}</span>
-            <span className="text-sm text-gray-600">ID: {player.id}</span>
-          </div>
-        ))}
-      </div>
+    <div className="space-y-2">
+      {uniquePlayers.map((playerName, index) => (
+        <div
+          key={`${playerName}-${index}`}
+          className="bg-gray-50 p-2 rounded-md"
+        >
+          <span className="font-medium">{playerName}</span>
+        </div>
+      ))}
     </div>
   );
 };
