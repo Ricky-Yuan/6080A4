@@ -129,4 +129,12 @@ export const joinGame = async (sessionId, playerName) => {
     name: playerName
   });
   return response;
+};
+
+// Submit answer for a question
+export const submitAnswer = async (sessionId, playerId, answerIds) => {
+  const response = await apiClient.put(`/play/${sessionId}/${playerId}/answer`, {
+    answerIds: [answerIds]  // Backend expects an array of answer IDs
+  });
+  return response.data;
 }; 

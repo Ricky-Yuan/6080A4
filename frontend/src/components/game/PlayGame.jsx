@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getPlayerGameStatus } from '../../api/game';
+import { getPlayerGameStatus, submitAnswer } from '../../api/game';
 import Button from '../common/Button';
 import QuestionDisplay from './QuestionDisplay';
 
@@ -11,6 +11,7 @@ const PlayGame = () => {
   const [timeLeft, setTimeLeft] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAnswered, setHasAnswered] = useState(false);
 
   // Fetch game status periodically
   useEffect(() => {
@@ -48,14 +49,32 @@ const PlayGame = () => {
   }, [sessionId]);
 
   const handleAnswer = async (optionIndex) => {
+    // Prevent multiple answers for the same question
+    if (hasAnswered) {
+      return;
+    }
+
     try {
-      // TODO: Implement answer submission
-      console.log('Selected answer:', optionIndex);
+      setIsLoading(true);
+      await submitAnswer(sessionId, playerId, optionIndex);
+      setHasAnswered(true);
+      
+      // Optional: Show success message
+      console.log('Answer submitted successfully');
     } catch (error) {
       console.error('Failed to submit answer:', error);
-      setError('Failed to submit answer');
+      setError('Failed to submit answer. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // Reset hasAnswered when question changes
+  useEffect(() => {
+    if (currentQuestion) {
+      setHasAnswered(false);
+    }
+  }, [currentQuestion?.number]);
 
   if (isLoading) {
     return (
@@ -86,7 +105,13 @@ const PlayGame = () => {
           question={currentQuestion}
           onAnswer={handleAnswer}
           timeLeft={timeLeft}
+          disabled={hasAnswered}
         />
+        {hasAnswered && (
+          <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md">
+            Answer submitted! Waiting for next question...
+          </div>
+        )}
       </div>
     </div>
   );
