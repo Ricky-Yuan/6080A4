@@ -49,7 +49,6 @@ const PlayGame = () => {
   }, [sessionId]);
 
   const handleAnswer = async (optionIndex) => {
-    // Prevent multiple answers for the same question
     if (hasAnswered) {
       return;
     }
@@ -58,14 +57,18 @@ const PlayGame = () => {
       setIsLoading(true);
       await submitAnswer(sessionId, playerId, optionIndex);
       setHasAnswered(true);
-      
-      // Optional: Show success message
-      console.log('Answer submitted successfully');
     } catch (error) {
       console.error('Failed to submit answer:', error);
       setError('Failed to submit answer. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleTimeUp = () => {
+    if (!hasAnswered) {
+      setHasAnswered(true);
+      console.log('Time is up! Moving to next question...');
     }
   };
 
@@ -106,10 +109,13 @@ const PlayGame = () => {
           onAnswer={handleAnswer}
           timeLeft={timeLeft}
           disabled={hasAnswered}
+          onTimeUp={handleTimeUp}
         />
         {hasAnswered && (
           <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md">
-            Answer submitted! Waiting for next question...
+            {timeLeft <= 0 
+              ? "Time's up! Waiting for next question..."
+              : "Answer submitted! Waiting for next question..."}
           </div>
         )}
       </div>

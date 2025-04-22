@@ -1,7 +1,8 @@
 import React from 'react';
 import Button from '../common/Button';
+import Timer from './Timer';
 
-const QuestionDisplay = ({ question, onAnswer, timeLeft, disabled }) => {
+const QuestionDisplay = ({ question, onAnswer, timeLeft, disabled, onTimeUp }) => {
   if (!question) {
     return (
       <div className="text-center py-4">
@@ -15,10 +16,11 @@ const QuestionDisplay = ({ question, onAnswer, timeLeft, disabled }) => {
       {/* Question header */}
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-semibold">Question {question.number}</h3>
-        {timeLeft && (
-          <div className="text-lg font-medium">
-            Time left: <span className="text-blue-600">{timeLeft}s</span>
-          </div>
+        {timeLeft > 0 && (
+          <Timer
+            initialTime={timeLeft}
+            onTimeUp={onTimeUp}
+          />
         )}
       </div>
 
