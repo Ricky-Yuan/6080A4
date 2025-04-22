@@ -116,9 +116,26 @@ export const endGame = async (gameId) => {
 
 // Get game status (admin only)
 export const getGameStatus = async (sessionId) => {
-  const response = await apiClient.get(`/admin/session/${sessionId}/status`);
-  console.log('Admin game status response:', response);
-  return response;  // apiClient already returns the parsed response
+  try {
+    const response = await apiClient.get(`/admin/session/${sessionId}/status`);
+    console.log('Admin game status response:', response);
+    
+    // 确保返回正确的数据结构
+    if (!response || !response.results) {
+      return { results: { 
+        active: false,
+        players: [],
+        started: false,
+        position: -1,
+        questions: []
+      }};
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching game status:', error);
+    throw error;
+  }
 };
 
 // Get game status (for players)

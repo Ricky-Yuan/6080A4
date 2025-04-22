@@ -40,15 +40,15 @@ const JoinGamePage = () => {
       const response = await joinGame(sessionId, playerName);
       console.log('Join game response:', response);
       
-      if (!response || !response.playerId) {
-        console.error('Invalid response:', response);
-        throw new Error('Invalid server response format');
+      if (!response || typeof response.playerId === 'undefined') {
+        console.error('Invalid response format:', response);
+        throw new Error('Server response missing playerId');
       }
       
       navigate(`/play/${gameId}/${sessionId}/${response.playerId}`);
     } catch (error) {
       console.error('Error joining game:', error);
-      setError(error.message || 'Failed to join game');
+      setError(error.message || 'Failed to join game. Please try again.');
     } finally {
       setIsLoading(false);
     }

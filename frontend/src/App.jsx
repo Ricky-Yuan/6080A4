@@ -5,6 +5,7 @@ import RegisterForm from './components/auth/RegisterForm';
 import Dashboard from './components/dashboard/Dashboard';
 import GameSession from './components/game/GameSession';
 import JoinGamePage from './components/game/JoinGamePage';
+import PlayGame from './components/game/PlayGame';
 import Profile from './components/profile/Profile';
 import { useAuth } from './contexts/AuthContext';
 
@@ -55,7 +56,7 @@ const App = () => {
           }
         />
         <Route path="/play/:gameId/:sessionId" element={<JoinGamePage />} />
-        <Route path="/play/:gameId/:sessionId/:playerId" element={<GameSession />} />
+        <Route path="/play/:gameId/:sessionId/:playerId" element={<PlayGame />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

@@ -64,25 +64,44 @@ const GameSession = () => {
       setIsLoading(true);
       setError('');
 
-      // Try to end any existing game session first
+      // 先尝试结束任何现有的游戏会话
       try {
         await endGame(gameId);
-        // Add a small delay to ensure the session is properly ended
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // 等待一段时间确保会话完全结束
+        await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (error) {
         console.log('No active session to end or error ending session:', error);
-        // Continue with starting new game even if ending fails
       }
 
-      // Start new game
-      const response = await startGame(gameId);
-      console.log('Start game response:', response);
+      // 开始新游戏
+      let retryCount = 0;
+      let response;
       
-      if (!response || !response.sessionId) {
-        throw new Error('Failed to start game: No session ID received');
+      while (retryCount < 3) {
+        try {
+          response = await startGame(gameId);
+          if (response?.data?.sessionId) {
+            break;
+          }
+        } catch (error) {
+          console.log(`Start game attempt ${retryCount + 1} failed:`, error);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        retryCount++;
       }
+
+      if (!response?.data?.sessionId) {
+        throw new Error('Failed to start game: No session ID received after retries');
+      }
+
+      // 更新会话ID和状态
+      const newSessionId = response.data.sessionId;
+      setSessionId(newSessionId);
       
-      setSessionId(response.sessionId);
+      // 更新URL但不触发重定向
+      const newUrl = `/game/${gameId}?session=${newSessionId}`;
+      window.history.replaceState(null, '', newUrl);
+      
       setShowCopyLink(true);
     } catch (error) {
       console.error('Failed to start game:', error);
