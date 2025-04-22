@@ -14,22 +14,23 @@ const PlayGame = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasAnswered, setHasAnswered] = useState(false);
 
-  // Fetch game status periodically
   useEffect(() => {
     const fetchGameStatus = async () => {
       try {
         const status = await getPlayerGameStatus(sessionId);
-        setGameStatus(status);
+        console.log('Player game status:', status, 'Player ID:', playerId);
         
-        // Update current question if available
-        if (status?.question) {
-          setCurrentQuestion({
-            number: status.position + 1,
-            text: status.question.text,
-            options: status.question.options || []
-          });
-          // Set time left if provided
-          setTimeLeft(status.timeLeft);
+        if (status) {
+          setGameStatus(status);
+          
+          if (status.question) {
+            setCurrentQuestion({
+              number: status.position + 1,
+              text: status.question.text,
+              options: status.question.options || []
+            });
+            setTimeLeft(status.timeLeft);
+          }
         }
         
         setError('');
@@ -41,18 +42,13 @@ const PlayGame = () => {
       }
     };
 
-    // Initial fetch
     fetchGameStatus();
-
-    // Set up polling interval
-    const interval = setInterval(fetchGameStatus, 1000);
+    const interval = setInterval(fetchGameStatus, 2000);
     return () => clearInterval(interval);
-  }, [sessionId]);
+  }, [sessionId, playerId]);
 
   const handleAnswer = async (optionIndex) => {
-    if (hasAnswered) {
-      return;
-    }
+    if (hasAnswered) return;
 
     try {
       setIsLoading(true);
@@ -73,7 +69,6 @@ const PlayGame = () => {
     }
   };
 
-  // Reset hasAnswered when question changes
   useEffect(() => {
     if (currentQuestion) {
       setHasAnswered(false);
@@ -104,18 +99,21 @@ const PlayGame = () => {
   return (
     <div className="max-w-6xl mx-auto p-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Main game content */}
         <div className="md:col-span-2">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold mb-6">Game Session</h2>
-            <QuestionDisplay
-              question={currentQuestion}
-              onAnswer={handleAnswer}
-              timeLeft={timeLeft}
-              disabled={hasAnswered}
-              onTimeUp={handleTimeUp}
-            />
-            {hasAnswered && (
+            {!gameStatus?.started ? (
+              <p>Waiting for the game to start...</p>
+            ) : (
+              <QuestionDisplay
+                question={currentQuestion}
+                onAnswer={handleAnswer}
+                timeLeft={timeLeft}
+                disabled={hasAnswered}
+                onTimeUp={handleTimeUp}
+              />
+            )}
+            {hasAnswered && gameStatus?.started && (
               <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md">
                 {timeLeft <= 0 
                   ? "Time's up! Waiting for next question..."
@@ -125,12 +123,14 @@ const PlayGame = () => {
           </div>
         </div>
         
-        {/* Scoreboard */}
         <div className="md:col-span-1">
-          <ScoreBoard
-            players={gameStatus?.players || []}
-            currentPlayerId={playerId}
-          />
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold mb-4">Leaderboard</h2>
+            <ScoreBoard
+              players={gameStatus?.players || []}
+              currentPlayerId={playerId}
+            />
+          </div>
         </div>
       </div>
     </div>

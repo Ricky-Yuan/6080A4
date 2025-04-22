@@ -120,16 +120,22 @@ export const getGameStatus = async (sessionId) => {
 // Get game status (for players)
 export const getPlayerGameStatus = async (sessionId) => {
   const response = await apiClient.get(`/play/session/${sessionId}/status`);
-  return response.data;  // Return the entire response data, not just results
+  console.log('Player status response:', response);
+  return response.results;  // Return the results portion of the response
 };
 
 // Join game session
 export const joinGame = async (sessionId, playerName) => {
-  const response = await apiClient.post(`/play/join/${sessionId}`, {
-    name: playerName
-  });
-  console.log('API response:', response);
-  return response;  // Return the entire response since it already contains playerId
+  try {
+    const response = await apiClient.post(`/play/join/${sessionId}`, {
+      name: playerName
+    });
+    console.log('Raw API response:', response);
+    return response;  // Return the response directly since apiClient already processes it
+  } catch (error) {
+    console.error('Join game error:', error);
+    throw error;
+  }
 };
 
 // Submit answer for a question
