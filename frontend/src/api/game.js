@@ -161,13 +161,23 @@ export const getGameStatus = async (sessionId) => {
       };
     }
     
-    // Ensure all required fields are present
+    // Ensure all required fields are present and properly formatted
+    const questions = Array.isArray(response.results.questions) 
+      ? response.results.questions.map(q => ({
+          text: q.text || '',
+          answers: Array.isArray(q.answers) ? q.answers.map(a => ({
+            text: a.text || '',
+            isCorrect: !!a.isCorrect
+          })) : []
+        }))
+      : [];
+    
     const status = {
       ...response.results,
       players: response.results.players || [],
       started: response.results.started || false,
       position: response.results.position || -1,
-      questions: response.results.questions || [],
+      questions: questions,
       answerAvailable: response.results.answerAvailable || false,
       isoTimeLastQuestionStarted: response.results.isoTimeLastQuestionStarted || null
     };

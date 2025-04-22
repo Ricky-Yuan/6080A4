@@ -198,9 +198,15 @@ const GameSession = () => {
             <>
               {sessionStatus.position >= 0 && (
                 <QuestionDisplay
-                  question={sessionStatus.questions?.[sessionStatus.position]}
-                  position={sessionStatus.position}
-                  totalQuestions={sessionStatus.questions?.length || 0}
+                  question={{
+                    number: sessionStatus.position + 1,
+                    text: sessionStatus.questions?.[sessionStatus.position]?.text || '',
+                    options: sessionStatus.questions?.[sessionStatus.position]?.answers?.map(a => a.text) || []
+                  }}
+                  onAnswer={() => {}}
+                  timeLeft={0}
+                  disabled={false}
+                  onTimeUp={() => {}}
                 />
               )}
               <Button
