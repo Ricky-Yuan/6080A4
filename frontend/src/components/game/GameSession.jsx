@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { startGame, endGame, getGameStatus } from '../../api/game';
 import Button from '../common/Button';
@@ -17,8 +17,6 @@ const GameSession = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCopyLink, setShowCopyLink] = useState(true);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [errorCount, setErrorCount] = useState(0);
 
   // Get the join link for players
   const getJoinGameLink = () => {
@@ -26,96 +24,92 @@ const GameSession = () => {
     return `${baseUrl}/play/${gameId}/${sessionId}`;
   };
 
-  // Function to fetch game status
-  const fetchStatus = useCallback(async () => {
-    if (!sessionId) return;
-
-    try {
-      const response = await getGameStatus(sessionId);
-      console.log('Polling game status:', response);
-      
-      if (!response || !response.results) {
-        throw new Error('Invalid response format');
-      }
-
-      // Build updated status object
-      const updatedStatus = {
-        ...response.results,
-        players: response.results.players || [],
-        started: response.results.started || gameStarted,
-        position: response.results.position ?? -1,
-        questions: response.results.questions || []
-      };
-      
-      // Only update when status actually changes
-      setSessionStatus(prevStatus => {
-        if (JSON.stringify(prevStatus) === JSON.stringify(updatedStatus)) {
-          return prevStatus;
-        }
-        return updatedStatus;
-      });
-
-      // Reset error count
-      setErrorCount(0);
-      setError('');
-    } catch (error) {
-      console.error('Failed to fetch game status:', error);
-      // Only show error after multiple consecutive failures
-      setErrorCount(prev => {
-        if (prev >= 2) {
-          setError('Failed to fetch game status');
-        }
-        return prev + 1;
-      });
-    }
-  }, [sessionId, gameStarted]);
-
-  // Periodically fetch game status
+  // Fetch game status periodically
   useEffect(() => {
     if (!sessionId) return;
+
+    const fetchStatus = async () => {
+      try {
+        const response = await getGameStatus(sessionId);
+        console.log('Game session status:', response);
+        
+        if (!response || !response.results) {
+          throw new Error('Invalid response format');
+        }
+
+        // Ensure we have a valid status object with players array
+        const updatedStatus = {
+          ...response.results,
+          players: response.results.players || [],
+          started: response.results.started || false,
+          position: response.results.position || -1,
+          questions: response.results.questions || []
+        };
+        
+        setSessionStatus(updatedStatus);
+        setError('');
+      } catch (error) {
+        console.error('Failed to fetch game status:', error);
+        setError('Failed to fetch game status');
+      }
+    };
 
     fetchStatus();
     const interval = setInterval(fetchStatus, 2000);
     return () => clearInterval(interval);
-  }, [sessionId, fetchStatus]);
-
-  // Handle URL parameter changes
-  useEffect(() => {
-    const sessionFromUrl = searchParams.get('session');
-    if (sessionFromUrl && sessionFromUrl !== sessionId) {
-      console.log('URL session ID changed:', sessionFromUrl);
-      setSessionId(sessionFromUrl);
-    }
-  }, [searchParams, sessionId]);
+  }, [sessionId]);
 
   const handleStartGame = async () => {
-    // Prevent multiple starts
-    if (gameStarted) return;
-    
     try {
       setIsLoading(true);
       setError('');
 
-      // Check if players have already joined
+      // Check if we're already in a session with players
       if (sessionStatus?.players?.length > 0 && sessionId) {
-        // Start the game
+        // We're advancing the game to the first question
         const response = await startGame(gameId);
-        console.log('Start game response:', response);
+        console.log('Advancing game to first question:', response);
         
-        setGameStarted(true);
+        // Don't show the copy link modal when advancing
         setShowCopyLink(false);
         
         // Update game status
-        await fetchStatus();
+        const updatedStatus = await getGameStatus(sessionId);
+        if (updatedStatus?.results) {
+          setSessionStatus({
+            ...updatedStatus.results,
+            players: updatedStatus.results.players || [],
+            started: true,
+            position: 0,
+            questions: updatedStatus.results.questions || []
+          });
+        }
         return;
       }
 
-      // Start new game session
-      const response = await startGame(gameId);
-      console.log('Starting new game session:', response);
+      // Starting a new game session
+      let maxRetries = 3;
+      let retryCount = 0;
+      let response = null;
+      let lastError = null;
+
+      while (retryCount < maxRetries) {
+        try {
+          response = await startGame(gameId);
+          if (response?.data?.sessionId) {
+            break;
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+          lastError = error;
+          console.log(`Start game attempt ${retryCount + 1}/${maxRetries} failed:`, error);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        retryCount++;
+      }
 
       if (!response?.data?.sessionId) {
-        throw new Error('Invalid server response format');
+        throw new Error(lastError?.message || 'Failed to start game after multiple attempts');
       }
 
       // Update session ID and state
@@ -126,11 +120,8 @@ const GameSession = () => {
       const newUrl = `/game/${gameId}?session=${newSessionId}`;
       window.history.replaceState(null, '', newUrl);
       
-      // Show copy link dialog
+      // Only show copy link dialog when initially starting the game
       setShowCopyLink(true);
-      
-      // Get initial game status
-      await fetchStatus();
     } catch (error) {
       console.error('Failed to start game:', error);
       setError(error.message || 'Failed to start game. Please try again.');
@@ -143,7 +134,6 @@ const GameSession = () => {
     try {
       setIsLoading(true);
       await endGame(gameId);
-      setGameStarted(false);
       navigate('/dashboard');
     } catch (error) {
       console.error('Failed to end game:', error);
