@@ -128,7 +128,8 @@ export const joinGame = async (sessionId, playerName) => {
   const response = await apiClient.post(`/play/join/${sessionId}`, {
     name: playerName
   });
-  return response;
+  console.log('API response:', response);
+  return response;  // Return the entire response since it already contains playerId
 };
 
 // Submit answer for a question
