@@ -63,6 +63,18 @@ const GameSession = () => {
     try {
       setIsLoading(true);
       setError('');
+
+      // Try to end any existing game session first
+      try {
+        await endGame(gameId);
+        // Add a small delay to ensure the session is properly ended
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (error) {
+        console.log('No active session to end or error ending session:', error);
+        // Continue with starting new game even if ending fails
+      }
+
+      // Start new game
       const response = await startGame(gameId);
       console.log('Start game response:', response);
       

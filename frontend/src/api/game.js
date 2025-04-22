@@ -107,7 +107,10 @@ export const startGame = async (gameId) => {
 
 // End game session
 export const endGame = async (gameId) => {
-  const response = await apiClient.post(`/admin/game/${gameId}/mutate`, { mutationType: 'end' });
+  const response = await apiClient.post(`/admin/game/${gameId}/mutate`, { 
+    mutationType: 'end' 
+  });
+  console.log('End game response:', response);
   return response;
 };
 
