@@ -112,14 +112,14 @@ const Dashboard = () => {
       });
       
       // Wait for a short period to ensure clean state
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Start a new game session
       const response = await startGame(gameId);
       console.log('Game started successfully:', response);
       
       // Get session ID from response
-      const sessionId = response.sessionId;
+      const sessionId = response.data.sessionId;
       if (!sessionId) {
         throw new Error('Failed to get session ID');
       }
@@ -128,7 +128,7 @@ const Dashboard = () => {
       navigate(`/game/${gameId}?session=${sessionId}`);
     } catch (error) {
       console.error('Failed to start game:', error);
-      setError(error.response?.data?.error || 'Failed to start game');
+      setError(error.message || 'Failed to start game');
     } finally {
       setIsLoading(false);
     }

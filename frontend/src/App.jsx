@@ -4,6 +4,7 @@ import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
 import Dashboard from './components/dashboard/Dashboard';
 import GameSession from './components/game/GameSession';
+import GameEditor from './components/game/GameEditor';
 import JoinGamePage from './components/game/JoinGamePage';
 import PlayGame from './components/game/PlayGame';
 import Profile from './components/profile/Profile';
@@ -43,6 +44,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game/:gameId/edit"
+          element={
+            <ProtectedRoute>
+              <GameEditor />
             </ProtectedRoute>
           }
         />
