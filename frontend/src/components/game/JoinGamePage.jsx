@@ -45,7 +45,7 @@ const JoinGamePage = () => {
         throw new Error('Invalid server response format');
       }
       
-      navigate(`/game/play/${sessionId}/${response.playerId}`);
+      navigate(`/play/${gameId}/${sessionId}/${response.playerId}`);
     } catch (error) {
       console.error('Error joining game:', error);
       setError(error.message || 'Failed to join game');
