@@ -158,6 +158,11 @@ app.get('/play/:playerid/results', catchErrors(async (req, res) => {
   return res.status(200).send(await getResults(playerid));
 }));
 
+app.get('/play/session/:sessionid/status', catchErrors(async (req, res) => {
+  const { sessionid } = req.params;
+  return res.status(200).json({ results: await sessionStatus(sessionid) });
+}));
+
 /***************************************************************
                       Running Server
 ***************************************************************/
