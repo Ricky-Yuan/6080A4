@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { getPlayerGameStatus, submitAnswer } from '../../api/game';
 import Button from '../common/Button';
 import QuestionDisplay from './QuestionDisplay';
+import ScoreBoard from './ScoreBoard';
 
 const PlayGame = () => {
   const { gameId, sessionId, playerId } = useParams();
@@ -101,23 +102,36 @@ const PlayGame = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-6">Game Session</h2>
-        <QuestionDisplay
-          question={currentQuestion}
-          onAnswer={handleAnswer}
-          timeLeft={timeLeft}
-          disabled={hasAnswered}
-          onTimeUp={handleTimeUp}
-        />
-        {hasAnswered && (
-          <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md">
-            {timeLeft <= 0 
-              ? "Time's up! Waiting for next question..."
-              : "Answer submitted! Waiting for next question..."}
+    <div className="max-w-6xl mx-auto p-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Main game content */}
+        <div className="md:col-span-2">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-2xl font-bold mb-6">Game Session</h2>
+            <QuestionDisplay
+              question={currentQuestion}
+              onAnswer={handleAnswer}
+              timeLeft={timeLeft}
+              disabled={hasAnswered}
+              onTimeUp={handleTimeUp}
+            />
+            {hasAnswered && (
+              <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md">
+                {timeLeft <= 0 
+                  ? "Time's up! Waiting for next question..."
+                  : "Answer submitted! Waiting for next question..."}
+              </div>
+            )}
           </div>
-        )}
+        </div>
+        
+        {/* Scoreboard */}
+        <div className="md:col-span-1">
+          <ScoreBoard
+            players={gameStatus?.players || []}
+            currentPlayerId={playerId}
+          />
+        </div>
       </div>
     </div>
   );
