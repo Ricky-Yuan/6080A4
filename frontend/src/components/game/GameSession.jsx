@@ -64,7 +64,30 @@ const GameSession = () => {
       setIsLoading(true);
       setError('');
 
-      // Start new game
+      // Check if we're already in a session with players
+      if (sessionStatus?.players?.length > 0 && sessionId) {
+        // We're advancing the game to the first question
+        const response = await startGame(gameId);
+        console.log('Advancing game to first question:', response);
+        
+        // Don't show the copy link modal when advancing
+        setShowCopyLink(false);
+        
+        // Update game status
+        const updatedStatus = await getGameStatus(sessionId);
+        if (updatedStatus?.results) {
+          setSessionStatus({
+            ...updatedStatus.results,
+            players: updatedStatus.results.players || [],
+            started: true,
+            position: 0,
+            questions: updatedStatus.results.questions || []
+          });
+        }
+        return;
+      }
+
+      // Starting a new game session
       let maxRetries = 3;
       let retryCount = 0;
       let response = null;
@@ -97,6 +120,7 @@ const GameSession = () => {
       const newUrl = `/game/${gameId}?session=${newSessionId}`;
       window.history.replaceState(null, '', newUrl);
       
+      // Only show copy link dialog when initially starting the game
       setShowCopyLink(true);
     } catch (error) {
       console.error('Failed to start game:', error);

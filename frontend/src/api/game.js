@@ -146,18 +146,33 @@ export const getGameStatus = async (sessionId) => {
     const response = await apiClient.get(`/admin/session/${sessionId}/status`);
     console.log('Admin game status response:', response);
     
-    // 确保返回正确的数据结构
+    // Ensure we return a valid status object
     if (!response || !response.results) {
-      return { results: { 
-        active: false,
-        players: [],
-        started: false,
-        position: -1,
-        questions: []
-      }};
+      return {
+        results: {
+          active: false,
+          players: [],
+          started: false,
+          position: -1,
+          questions: [],
+          answerAvailable: false,
+          isoTimeLastQuestionStarted: null
+        }
+      };
     }
     
-    return response;
+    // Ensure all required fields are present
+    const status = {
+      ...response.results,
+      players: response.results.players || [],
+      started: response.results.started || false,
+      position: response.results.position || -1,
+      questions: response.results.questions || [],
+      answerAvailable: response.results.answerAvailable || false,
+      isoTimeLastQuestionStarted: response.results.isoTimeLastQuestionStarted || null
+    };
+    
+    return { results: status };
   } catch (error) {
     console.error('Error fetching game status:', error);
     throw error;
